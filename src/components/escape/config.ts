@@ -197,3 +197,154 @@ export const ROOM_2_DATA = {
     "礼物档案已归档完成。\n原来这些东西不只是礼物，还是我们一路走过来的证据。",
   nextCta: "进入未来的一日行程单",
 };
+
+// ===== 房间 3：未来的一日行程单 =====
+export type Room3Item = {
+  id: string;
+  label: string;
+  icon: string;
+  x: number; // %
+  y: number;
+  /** 物件详情视觉展示文案（modal 顶部） */
+  visual: string[];
+  question: string;
+  /** 字段定义：占位 + 前缀（如 "¥"）+ 后缀（如 "小时"） */
+  fields: { placeholder?: string; prefix?: string; suffix?: string; width?: string }[];
+  /** 每个字段可接受的答案数组（规范化后比较：去空格、转小写） */
+  answers: string[][];
+  errorMessages: [string, string];
+  fragment: string; // 答对获得的碎片字
+};
+
+export const ROOM_3_DATA = {
+  meta: {
+    index: 3,
+    total: 3,
+    name: "未来的一日行程单",
+    subtitle: "桌面上散落着我们下次见面的零件",
+    ambient:
+      "白色桌面上摊着一些东西：机票、小票、两碗面、两杯咖啡、一张北京地图。门旁柜子上有一只暗着的许愿瓶。",
+    bottleHintEmpty: "收集五片愿望碎片后，把它们放进许愿瓶。",
+    bottleHintReady: "愿望碎片已收集完成。\n请按顺序把它们放进许愿瓶。",
+    bottleWrongOrder: "顺序好像不对哦，先把这句话念完整～",
+    successText: "许愿瓶被点亮了。",
+    nextCta: "进入结算页",
+  },
+  /** 碎片的正确顺序（生→日→快→乐→呀） */
+  fragmentOrder: ["生", "日", "快", "乐", "呀"],
+
+  items: [
+    {
+      id: "ticket",
+      label: "机票",
+      icon: "🎫",
+      x: 22,
+      y: 30,
+      visual: [
+        "✈️  伦敦希思罗 LHR  →  北京首都 PEK",
+        "舱位：经济舱  ·  航班：BA039（示意）",
+        "飞行时长：______ 小时",
+      ],
+      question: "直飞大约需要几个小时？",
+      fields: [{ placeholder: "10", suffix: "小时", width: "w-24" }],
+      answers: [["10", "约10", "10小时", "约10小时"]],
+      errorMessages: [
+        "好像不是这个时长，再想想跨过半个地球要多久～",
+        "查查上次航班再试试吧～",
+      ],
+      fragment: "生",
+    },
+    {
+      id: "popmart",
+      label: "POP MART 小票",
+      icon: "🧾",
+      x: 70,
+      y: 28,
+      visual: [
+        "POP MART · 未来某天",
+        "—————————————",
+        "星星人          ¥ ______",
+        "Nyota           ¥ ______",
+        "机甲版 Labubu   ¥ ______",
+      ],
+      question: "请按顺序填入小票上的缺失金额：",
+      fields: [
+        { placeholder: "星星人", prefix: "¥", width: "w-20" },
+        { placeholder: "Nyota", prefix: "¥", width: "w-20" },
+        { placeholder: "机甲", prefix: "¥", width: "w-20" },
+      ],
+      answers: [["69"], ["69"], ["89"]],
+      errorMessages: [
+        "金额好像不太对，再看看这张未来小票～",
+        "其中有两个价格相同，再试试吧～",
+      ],
+      fragment: "日",
+    },
+    {
+      id: "noodles",
+      label: "两个圆碗",
+      icon: "🍜",
+      x: 35,
+      y: 62,
+      visual: [
+        "🥣  辣面（红油上一个大大的 ❌）",
+        "🥣  白面（旁边也画着 ❌）",
+        "（不吃辣 + 不吃白，看来是冲招牌去的。）",
+      ],
+      question: "这是哪家店的面面？",
+      fields: [{ placeholder: "_ _ _ _", width: "w-32" }],
+      answers: [["胖妹面庄"]],
+      errorMessages: [
+        "不对哦，这家店还有一个很适合一起点的东西～",
+        "绿豆沙冰",
+      ],
+      fragment: "快",
+    },
+    {
+      id: "coffee",
+      label: "两杯 Manner",
+      icon: "☕",
+      x: 58,
+      y: 60,
+      visual: [
+        "🥤 Manner  ·  Cup #1",
+        "🥤 Manner  ·  Cup #2",
+        "（杯壁上挂着小气泡，闻起来有点葡萄味。）",
+      ],
+      question: "这是我们都爱的哪款 Manner 咖啡？",
+      fields: [{ placeholder: "_ _ _ _", width: "w-32" }],
+      answers: [["冰葡美式"]],
+      errorMessages: [
+        "不是这一杯，再想想我们都爱的那款～",
+        "此款咖啡含起泡、含某种水果",
+      ],
+      fragment: "乐",
+    },
+    {
+      id: "map",
+      label: "北京地图",
+      icon: "🗺️",
+      x: 82,
+      y: 70,
+      visual: [
+        "简化版北京地图：",
+        "·  西南角一个点 → 向上",
+        "·  到正中偏上一个点 → 再向上",
+        "·  到纸张最上方偏左一个点",
+        "（一条要开很久很久的路线。）",
+      ],
+      question: "这是从哪里到哪里到哪里的路线？",
+      fields: [
+        { placeholder: "?", suffix: "区", width: "w-20" },
+        { placeholder: "?", suffix: "区", width: "w-20" },
+        { placeholder: "?", suffix: "区", width: "w-20" },
+      ],
+      answers: [["房山"], ["朝阳"], ["怀柔"]],
+      errorMessages: [
+        "路线好像不太对，再想想它跨过了北京的哪些地方～",
+        "开车要很久很久，跨过很多环。",
+      ],
+      fragment: "呀",
+    },
+  ] as Room3Item[],
+};
