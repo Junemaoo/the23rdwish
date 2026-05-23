@@ -66,7 +66,11 @@ function Index() {
 
       {stage === "room" && (
         <Fade k={`room-${roomIdx}`}>
-          <Room config={ROOMS[roomIdx]} onComplete={nextRoom} />
+          {roomIdx === 0 ? (
+            <Room1 onComplete={nextRoom} />
+          ) : (
+            <Room config={ROOMS[roomIdx]} onComplete={nextRoom} />
+          )}
         </Fade>
       )}
 
