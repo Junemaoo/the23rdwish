@@ -317,7 +317,7 @@ function ItemModal({
 
   // 切换 item 时重置
   const key = item?.id ?? "none";
-  useMemo(() => {
+  useEffect(() => {
     setValues(item ? item.fields.map(() => "") : []);
     setWrong(0);
     setMsg("");
