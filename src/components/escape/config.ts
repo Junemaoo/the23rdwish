@@ -1,14 +1,15 @@
 // 所有谜题数据和文案，方便后续修改
 
 export const OPENING = {
-  title: "小毛子独家定制密室",
+  title: "小毛子独家定制密室逃脱",
   subtitle: "——第 23 次许愿",
   intro: [
-    "今天是你的第 23 个生日。",
-    "我把这一年里所有想对你说的话，藏在了三间小房间里。",
-    "推开门，慢慢走，最后会有一个许愿的位置在等你。",
+    "欢迎进入小毛子独家定制密室逃脱。",
+    "本密室共三间房间。",
+    "请点击房间中的高亮物件，寻找线索，完成第 23 次许愿。",
+    "电脑端体验最佳，游玩时间约 10–15 分钟。",
   ],
-  enterCta: "推开第一扇门",
+  enterCta: "开始第 23 次许愿",
 };
 
 export type Hotspot = {
@@ -93,66 +94,19 @@ const ROOM_1: RoomConfig = {
 
 export const ROOMS: RoomConfig[] = [
   ROOM_1,
+  // 房间 2 的元数据（详细数据见下方 ROOM_2_DATA，Room2 组件单独渲染）
   {
     id: "room2",
     index: 2,
     name: "礼物档案室",
-    subtitle: "那些我偷偷收着的小东西",
-    ambient: "一整面木格子墙，每一格放着一件小物，标签上是日期。",
-    hotspots: [
-      {
-        id: "g1",
-        label: "格子 · 2022.07",
-        x: 18,
-        y: 28,
-        icon: "🎀",
-        clueTitle: "第一次送你的发圈",
-        clueText: "你那天扎了个很乱的丸子头，但我觉得超好看。",
-      },
-      {
-        id: "g2",
-        label: "格子 · 2023.02",
-        x: 42,
-        y: 28,
-        icon: "📖",
-        clueTitle: "你借我又忘了拿回去的书",
-        clueText: "我在第 23 页折了一个角，那一页写着「我喜欢你」。",
-      },
-      {
-        id: "g3",
-        label: "格子 · 2024.05",
-        x: 66,
-        y: 28,
-        icon: "🐻",
-        clueTitle: "夹娃娃机里抓到的小熊",
-        clueText: "我抓了 11 次才出来，但跟你说是一次就中。",
-      },
-      {
-        id: "g4",
-        label: "格子 · 2025.11",
-        x: 30,
-        y: 65,
-        icon: "🎟️",
-        clueTitle: "那场演唱会的票根",
-        clueText: "你在副歌的时候偷偷哭了，我假装没看见。",
-      },
-      {
-        id: "g5",
-        label: "最上面那一格",
-        x: 78,
-        y: 60,
-        icon: "🗝️",
-        clueTitle: "一把小钥匙",
-        clueText:
-          "标签上写着：「数一数，这间房里我藏了多少件礼物？把数字告诉我。」",
-      },
-    ],
-    puzzlePrompt: "这间档案室里一共有几件礼物？（输入数字）",
-    puzzleHint: "把所有的格子都点一遍，包括最上面那把钥匙。",
-    answer: "5",
-    successText:
-      "其实远远不止 5 件。\n只是房间太小，装不下我想送你的全部。",
-    nextCta: "去看看明天",
+    subtitle: "那些我偷偷送过的小东西",
+    ambient: "",
+    hotspots: [],
+    puzzlePrompt: "",
+    puzzleHint: "",
+    answer: "",
+    successText: "",
+    nextCta: "进入未来的一日行程单",
   },
   {
     id: "room3",
@@ -242,3 +196,51 @@ export const FINALE = {
 };
 
 export const MAX_WRONG_HINT = 3;
+
+// ===== 房间 2：礼物档案室 =====
+export type Exhibit = {
+  id: string; // "e1" ~ "e10"
+  no: number;
+  name: string;
+  icon: string;
+  desc: string;
+};
+
+export const ROOM_2_DATA = {
+  meta: {
+    index: 2,
+    total: 3,
+    name: "礼物档案室",
+    subtitle: "把这些年送过的小东西，按时间归档",
+    ambient:
+      "推开门，是一间小小的私人展览馆。十个展柜沿着墙顺时针绕一圈，每一件都被仔细摆过。",
+  },
+  exhibits: [
+    { id: "e1", no: 1, name: "AirPods", icon: "🎧", desc: "第一次想着「希望你走路上耳朵里有我挑的歌」。" },
+    { id: "e2", no: 2, name: "宝矿力", icon: "🧴", desc: "你那次发烧到 39 度，我冲了一整箱过去。" },
+    { id: "e3", no: 3, name: "电动牙刷", icon: "🪥", desc: "你说想好好刷牙，我立刻下了单。" },
+    { id: "e4", no: 4, name: "护肤套盒", icon: "🧖‍♀️", desc: "柜姐推荐的那套，说很适合你。" },
+    { id: "e5", no: 5, name: "ON 金标蛋白粉", icon: "🥛", desc: "陪你健身的那阵子，每天一勺。" },
+    { id: "e6", no: 6, name: "斜挎包", icon: "👜", desc: "挑了能塞下笔电的那一款。" },
+    { id: "e7", no: 7, name: "宝格丽大吉岭茶香水", icon: "🌸", desc: "第一次见你之后，我一直记得那股味道。" },
+    { id: "e8", no: 8, name: "乐高法拉利积木", icon: "🏎️", desc: "拼了一个下午，盒子比你人还大。" },
+    { id: "e9", no: 9, name: "lululemon 运动服", icon: "🩱", desc: "想你跑步的时候穿得舒服一点。" },
+    { id: "e10", no: 10, name: "鱼油", icon: "🐟", desc: "希望你别熬夜了，但我知道你会。" },
+  ] as Exhibit[],
+
+  // 五个需要排序的展品
+  sortablePool: ["e2", "e1", "e7", "e10", "e8"],
+  // 正确的时间顺序（从 2020 → 2026）
+  correctOrder: ["e2", "e1", "e7", "e10", "e8"],
+  slotLabels: ["2020", "2022", "2023", "2025", "2026"],
+
+  puzzlePrompt:
+    "把这五件礼物，按出现的时间顺序拖进卡槽（左 = 早，右 = 晚）：",
+  errorMessages: [
+    "顺序好像不太对，再想想这些礼物分别是什么时候出现的～",
+    "按关键词去聊天记录查查吧～",
+  ],
+  successText:
+    "礼物档案已归档完成。\n原来这些东西不只是礼物，还是我们一路走过来的证据。",
+  nextCta: "进入未来的一日行程单",
+};
