@@ -196,3 +196,51 @@ export const FINALE = {
 };
 
 export const MAX_WRONG_HINT = 3;
+
+// ===== 房间 2：礼物档案室 =====
+export type Exhibit = {
+  id: string; // "e1" ~ "e10"
+  no: number;
+  name: string;
+  icon: string;
+  desc: string;
+};
+
+export const ROOM_2_DATA = {
+  meta: {
+    index: 2,
+    total: 3,
+    name: "礼物档案室",
+    subtitle: "把这些年送过的小东西，按时间归档",
+    ambient:
+      "推开门，是一间小小的私人展览馆。十个展柜沿着墙顺时针绕一圈，每一件都被仔细摆过。",
+  },
+  exhibits: [
+    { id: "e1", no: 1, name: "AirPods", icon: "🎧", desc: "第一次想着「希望你走路上耳朵里有我挑的歌」。" },
+    { id: "e2", no: 2, name: "宝矿力", icon: "🧴", desc: "你那次发烧到 39 度，我冲了一整箱过去。" },
+    { id: "e3", no: 3, name: "电动牙刷", icon: "🪥", desc: "你说想好好刷牙，我立刻下了单。" },
+    { id: "e4", no: 4, name: "护肤套盒", icon: "🧖‍♀️", desc: "柜姐推荐的那套，说很适合你。" },
+    { id: "e5", no: 5, name: "ON 金标蛋白粉", icon: "🥛", desc: "陪你健身的那阵子，每天一勺。" },
+    { id: "e6", no: 6, name: "斜挎包", icon: "👜", desc: "挑了能塞下笔电的那一款。" },
+    { id: "e7", no: 7, name: "宝格丽大吉岭茶香水", icon: "🌸", desc: "第一次见你之后，我一直记得那股味道。" },
+    { id: "e8", no: 8, name: "乐高法拉利积木", icon: "🏎️", desc: "拼了一个下午，盒子比你人还大。" },
+    { id: "e9", no: 9, name: "lululemon 运动服", icon: "🩱", desc: "想你跑步的时候穿得舒服一点。" },
+    { id: "e10", no: 10, name: "鱼油", icon: "🐟", desc: "希望你别熬夜了，但我知道你会。" },
+  ] as Exhibit[],
+
+  // 五个需要排序的展品
+  sortablePool: ["e2", "e1", "e7", "e10", "e8"],
+  // 正确的时间顺序（从 2020 → 2026）
+  correctOrder: ["e2", "e1", "e7", "e10", "e8"],
+  slotLabels: ["2020", "2022", "2023", "2025", "2026"],
+
+  puzzlePrompt:
+    "把这五件礼物，按出现的时间顺序拖进卡槽（左 = 早，右 = 晚）：",
+  errorMessages: [
+    "顺序好像不太对，再想想这些礼物分别是什么时候出现的～",
+    "按关键词去聊天记录查查吧～",
+  ],
+  successText:
+    "礼物档案已归档完成。\n原来这些东西不只是礼物，还是我们一路走过来的证据。",
+  nextCta: "进入未来的一日行程单",
+};
