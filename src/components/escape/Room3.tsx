@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ROOM_3_DATA, type Room3Item } from "./config";
 import { Modal } from "./ui";
 
