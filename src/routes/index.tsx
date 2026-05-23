@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { OPENING, ROOMS } from "@/components/escape/config";
 import { Room } from "@/components/escape/Room";
+import { Room1 } from "@/components/escape/Room1";
 import { Finale } from "@/components/escape/Finale";
 import { Fade, ProgressDots } from "@/components/escape/ui";
 
