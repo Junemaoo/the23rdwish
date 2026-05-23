@@ -69,6 +69,8 @@ function Index() {
         <Fade k={`room-${roomIdx}`}>
           {roomIdx === 0 ? (
             <Room1 onComplete={nextRoom} />
+          ) : roomIdx === 1 ? (
+            <Room2 onComplete={nextRoom} />
           ) : (
             <Room config={ROOMS[roomIdx]} onComplete={nextRoom} />
           )}
