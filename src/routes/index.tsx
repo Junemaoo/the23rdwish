@@ -3,6 +3,7 @@ import { useState } from "react";
 import { OPENING, ROOMS } from "@/components/escape/config";
 import { Room } from "@/components/escape/Room";
 import { Room1 } from "@/components/escape/Room1";
+import { Room2 } from "@/components/escape/Room2";
 import { Finale } from "@/components/escape/Finale";
 import { Fade, ProgressDots } from "@/components/escape/ui";
 
