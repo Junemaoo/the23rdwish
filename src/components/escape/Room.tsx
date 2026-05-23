@@ -80,6 +80,7 @@ export function Room({
         prompt={config.puzzlePrompt}
         hint={config.puzzleHint}
         answer={config.answer}
+        errorMessages={config.errorMessages}
         onSolved={() => setSolved(true)}
       />
 

@@ -11,81 +11,88 @@ export const OPENING = {
   enterCta: "推开第一扇门",
 };
 
+export type Hotspot = {
+  id: string;
+  label: string;
+  x: number; // %
+  y: number; // %
+  icon: string;
+  clueTitle: string;
+  clueText: string;
+};
+
 export type RoomConfig = {
   id: string;
   index: number;
   name: string;
   subtitle: string;
-  ambient: string; // 房间氛围描述
-  hotspots: {
-    id: string;
-    label: string; // 热点名称（点击后显示）
-    x: number; // % 位置
-    y: number;
-    icon: string; // emoji 占位
-    clueTitle: string;
-    clueText: string;
-  }[];
+  ambient: string;
+  hotspots: Hotspot[];
   puzzlePrompt: string;
   puzzleHint: string;
-  answer: string; // 不区分大小写
+  answer: string;
+  /** 按尝试次数返回错误提示（数组最后一项作为后续兜底） */
+  errorMessages?: string[];
   successText: string;
   nextCta: string;
 };
 
+// ===== 房间 1：我们，在世界的两端 =====
+// 三个数字：520 + 1420 + 912 = 2852
+const ROOM_1: RoomConfig = {
+  id: "room1",
+  index: 1,
+  name: "我们，在世界的两端",
+  subtitle: "时差 · 想念 · 一句没说出口的话",
+  ambient:
+    "左边是你在伦敦的小公寓，右边是我的工位和健身房，中间一条长廊把两个时区连在一起。",
+  hotspots: [
+    {
+      id: "pc-left",
+      label: "你的笔记本",
+      x: 18,
+      y: 58,
+      icon: "💻",
+      clueTitle: "你的电脑亮了一下",
+      clueText:
+        "锁屏时间：05:20\n壁纸是我们去年夏天在海边那张照片。",
+    },
+    {
+      id: "pc-right",
+      label: "我的台式机",
+      x: 70,
+      y: 50,
+      icon: "🖥️",
+      clueTitle: "我的电脑亮了一下",
+      clueText:
+        "锁屏时间：14:20\n旁边一排 Labubu 正盯着屏幕，假装在加班。",
+    },
+    {
+      id: "calendar",
+      label: "走廊尽头的日历",
+      x: 50,
+      y: 18,
+      icon: "📅",
+      clueTitle: "墙上的那本日历",
+      clueText:
+        "翻到这一页，有一格被红色马克笔画了一个大大的爱心 ❤️。\n你应该知道是哪一天吧——那天我们认识的。",
+    },
+  ],
+  puzzlePrompt: "把这三个数字按顺序加起来，得到四位密码：",
+  puzzleHint:
+    "电脑1 → 电脑2 → 日历上爱心那天（写成 4 位数字，月+日，例如 09 月 12 日 = 912）。",
+  answer: "2852",
+  errorMessages: [
+    "密码不对哦，再看看三个数字之间是什么关系～",
+    "这是一道你高中最擅长的学科的问题，很简单，再试试吧～",
+  ],
+  successText:
+    "门锁咔哒一声打开了。\n原来世界两端的时间，也可以被算进同一个答案里。",
+  nextCta: "进入礼物档案室",
+};
+
 export const ROOMS: RoomConfig[] = [
-  {
-    id: "room1",
-    index: 1,
-    name: "我们，在世界的两端",
-    subtitle: "时差 · 想念 · 一句没说出口的话",
-    ambient: "暖黄台灯、木质书桌、墙上贴着两张明信片，窗外是不同时区的夜色。",
-    hotspots: [
-      {
-        id: "clock-left",
-        label: "我这边的钟",
-        x: 18,
-        y: 30,
-        icon: "🕗",
-        clueTitle: "我这边的时间",
-        clueText: "现在是晚上 8:00，我刚煮好一锅你爱吃的番茄牛腩。",
-      },
-      {
-        id: "clock-right",
-        label: "你那边的钟",
-        x: 78,
-        y: 30,
-        icon: "🕐",
-        clueTitle: "你那边的时间",
-        clueText: "你那边是凌晨 1:00，应该刚下班瘫在沙发上吧。",
-      },
-      {
-        id: "postcard",
-        label: "桌上的明信片",
-        x: 50,
-        y: 65,
-        icon: "💌",
-        clueTitle: "明信片背面",
-        clueText:
-          "「不管隔多少小时，我都把它换算成——我有多想你。」\n提示：把两边的时间相减，得到一个数字。",
-      },
-      {
-        id: "cup",
-        label: "凉掉的咖啡",
-        x: 30,
-        y: 72,
-        icon: "☕",
-        clueTitle: "杯垫上写着",
-        clueText: "等你回来一起喝。",
-      },
-    ],
-    puzzlePrompt: "我们之间，差了几个小时？（请输入数字）",
-    puzzleHint: "20:00 与次日 01:00 之间的小时差。",
-    answer: "5",
-    successText:
-      "5 个小时而已。\n我把这 5 个小时，全部用来想你了。",
-    nextCta: "走向下一间房",
-  },
+  ROOM_1,
   {
     id: "room2",
     index: 2,
@@ -234,4 +241,4 @@ export const FINALE = {
     "愿望已经收到了。\n剩下的，交给我和这一整年。\n生日快乐，我的人。",
 };
 
-export const MAX_WRONG_HINT = 3; // 错误几次后强制提示
+export const MAX_WRONG_HINT = 3;

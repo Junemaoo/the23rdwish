@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { OPENING, ROOMS } from "@/components/escape/config";
 import { Room } from "@/components/escape/Room";
+import { Room1 } from "@/components/escape/Room1";
 import { Finale } from "@/components/escape/Finale";
 import { Fade, ProgressDots } from "@/components/escape/ui";
 
@@ -65,7 +66,11 @@ function Index() {
 
       {stage === "room" && (
         <Fade k={`room-${roomIdx}`}>
-          <Room config={ROOMS[roomIdx]} onComplete={nextRoom} />
+          {roomIdx === 0 ? (
+            <Room1 onComplete={nextRoom} />
+          ) : (
+            <Room config={ROOMS[roomIdx]} onComplete={nextRoom} />
+          )}
         </Fade>
       )}
 
@@ -80,24 +85,36 @@ function Index() {
 
 function Opening({ onStart }: { onStart: () => void }) {
   return (
-    <section className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
-      <div className="mb-8 text-6xl">🕯️</div>
-      <h1 className="font-serif text-4xl text-foreground sm:text-5xl">
+    <section
+      className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 text-center"
+      style={{
+        background:
+          "radial-gradient(ellipse at 50% 30%, oklch(0.28 0.05 250) 0%, oklch(0.18 0.03 250) 50%, oklch(0.12 0.02 250) 100%)",
+      }}
+    >
+      {/* 星点 */}
+      <div className="pointer-events-none absolute inset-0 opacity-40 [background-image:radial-gradient(white_1px,transparent_1px)] [background-size:48px_48px]" />
+      <div className="relative z-10 mb-8 text-6xl drop-shadow-[0_0_20px_rgba(251,191,36,.6)]">
+        🕯️
+      </div>
+      <h1 className="relative z-10 font-serif text-4xl text-slate-50 sm:text-5xl">
         {OPENING.title}
       </h1>
-      <p className="mt-3 text-lg text-primary">{OPENING.subtitle}</p>
-      <div className="mt-8 max-w-md space-y-2 text-sm leading-relaxed text-muted-foreground">
+      <p className="relative z-10 mt-3 text-lg text-amber-300">
+        {OPENING.subtitle}
+      </p>
+      <div className="relative z-10 mt-8 max-w-md space-y-2 text-sm leading-relaxed text-slate-300">
         {OPENING.intro.map((line, i) => (
           <p key={i}>{line}</p>
         ))}
       </div>
       <button
         onClick={onStart}
-        className="mt-10 rounded-full bg-primary px-10 py-3.5 text-sm font-medium text-primary-foreground shadow-lg transition hover:scale-105 hover:opacity-90"
+        className="relative z-10 mt-10 rounded-full bg-amber-400 px-10 py-3.5 text-sm font-medium text-slate-900 shadow-[0_0_30px_rgba(251,191,36,.4)] transition hover:scale-105 hover:bg-amber-300"
       >
         {OPENING.enterCta}
       </button>
-      <p className="mt-6 text-xs text-muted-foreground">
+      <p className="relative z-10 mt-6 text-xs text-slate-400">
         建议在桌面浏览器中游玩 · 全程约 5–10 分钟
       </p>
     </section>

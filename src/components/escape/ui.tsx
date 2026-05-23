@@ -88,11 +88,14 @@ export function AnswerInput({
   hint,
   answer,
   onSolved,
+  errorMessages,
 }: {
   prompt: string;
   hint: string;
   answer: string;
   onSolved: () => void;
+  /** 自定义错误提示。第 n 次错误使用 errorMessages[n-1]，超出则用最后一条 */
+  errorMessages?: string[];
 }) {
   const [value, setValue] = useState("");
   const [wrong, setWrong] = useState(0);
@@ -108,8 +111,13 @@ export function AnswerInput({
     } else {
       const next = wrong + 1;
       setWrong(next);
-      if (next >= 3) setMsg(`不对哦…… 小提示：${hint}`);
-      else setMsg(`再想想（已尝试 ${next} 次）`);
+      if (errorMessages && errorMessages.length > 0) {
+        setMsg(errorMessages[Math.min(next - 1, errorMessages.length - 1)]);
+      } else if (next >= 3) {
+        setMsg(`不对哦…… 小提示：${hint}`);
+      } else {
+        setMsg(`再想想（已尝试 ${next} 次）`);
+      }
     }
   }
 
