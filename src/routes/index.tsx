@@ -72,7 +72,7 @@ function Index() {
           ) : roomIdx === 1 ? (
             <Room2 onComplete={nextRoom} />
           ) : (
-            <Room config={ROOMS[roomIdx]} onComplete={nextRoom} />
+            <Room3 onComplete={nextRoom} />
           )}
         </Fade>
       )}
