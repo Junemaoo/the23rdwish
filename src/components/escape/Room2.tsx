@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { ROOM_2_DATA, type Exhibit } from "./config";
 import { Modal } from "./ui";
+import { IsoDisplayCase, IsoDoor } from "./iso";
 
 /**
  * 房间 2：礼物档案室
