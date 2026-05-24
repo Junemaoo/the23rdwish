@@ -1,6 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { ROOM_3_DATA, type Room3Item } from "./config";
 import { Modal } from "./ui";
+import { IsoTicket, IsoReceipt, IsoBowls, IsoCoffeeCups, IsoMap, IsoBottle, IsoDoor } from "./iso";
+
+const ITEM_SVG: Record<string, React.FC<{ className?: string }>> = {
+  ticket: IsoTicket,
+  popmart: IsoReceipt,
+  noodles: IsoBowls,
+  coffee: IsoCoffeeCups,
+  map: IsoMap,
+};
 
 const norm = (s: string) => s.replace(/\s+/g, "").toLowerCase();
 
