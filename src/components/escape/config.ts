@@ -12,6 +12,28 @@ export const OPENING = {
   enterCta: "开始第 23 次许愿",
 };
 
+// 章节过场页文案
+export const CHAPTERS = [
+  {
+    title: "我们，在世界的两端",
+    intro:
+      "一个在伦敦的清晨 5 点 20 分，一个在北京的午后 2 点 20 分。\n中间隔着 7 小时，和一句没说出口的「想你」。",
+    cta: "推开门 →",
+  },
+  {
+    title: "礼物档案室",
+    intro:
+      "这间私人小展览，收着我偷偷送过、藏着没送的那些小东西。\n每一件都标了日期。",
+    cta: "走进展览 →",
+  },
+  {
+    title: "未来的一日行程单",
+    intro:
+      "一张白色的桌子，摆着我们下次见面的全部计划：\n机票、面、咖啡、和一只暗着的许愿瓶。",
+    cta: "打开行程单 →",
+  },
+] as const;
+
 export type Hotspot = {
   id: string;
   label: string;

@@ -1,6 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { ROOM_3_DATA, type Room3Item } from "./config";
 import { Modal } from "./ui";
+import { IsoTicket, IsoReceipt, IsoBowls, IsoCoffeeCups, IsoMap, IsoBottle, IsoDoor } from "./iso";
+
+const ITEM_SVG: Record<string, React.FC<{ className?: string }>> = {
+  ticket: IsoTicket,
+  popmart: IsoReceipt,
+  noodles: IsoBowls,
+  coffee: IsoCoffeeCups,
+  map: IsoMap,
+};
 
 const norm = (s: string) => s.replace(/\s+/g, "").toLowerCase();
 
@@ -70,52 +79,56 @@ export function Room3({ onComplete }: { onComplete: () => void }) {
 
       {/* 桌面场景 */}
       <div
-        className="relative w-full overflow-hidden rounded-3xl border border-border shadow-2xl"
+        className="relative w-full overflow-hidden rounded-3xl border-2 border-[oklch(0.45_0.06_45)] shadow-2xl"
         style={{
           aspectRatio: "16 / 9",
           background:
-            "radial-gradient(ellipse at 50% 30%, oklch(0.97 0.01 90) 0%, oklch(0.90 0.02 80) 70%, oklch(0.78 0.03 75) 100%)",
+            "radial-gradient(ellipse at 50% 30%, oklch(0.97 0.025 90) 0%, oklch(0.90 0.04 80) 55%, oklch(0.78 0.06 70) 100%)",
         }}
       >
+        {/* 大白桌面（透视梯形） */}
+        <div
+          className="absolute left-1/2 top-[14%] h-[80%] w-[88%] -translate-x-1/2 rounded-2xl shadow-2xl"
+          style={{
+            background: "linear-gradient(180deg, #FFFCF5 0%, #F2EAD8 100%)",
+            clipPath: "polygon(8% 0, 92% 0, 100% 100%, 0 100%)",
+          }}
+        />
         {/* 桌面光晕 */}
-        <div className="pointer-events-none absolute left-1/2 top-0 h-40 w-96 -translate-x-1/2 rounded-full bg-amber-200/40 blur-3xl" />
+        <div className="pointer-events-none absolute left-1/2 top-0 h-40 w-[80%] -translate-x-1/2 rounded-full bg-[oklch(0.92_0.075_85)] opacity-50 blur-3xl" />
 
-        {/* 5 个桌面物件 */}
+        {/* 5 个桌面物件（卡通 SVG） */}
         {items.map((it) => {
           const done = solvedItems.has(it.id);
+          const Svg = ITEM_SVG[it.id];
           return (
             <button
               key={it.id}
               onClick={() => setOpenItem(it)}
               style={{ left: `${it.x}%`, top: `${it.y}%` }}
-              className="group absolute -translate-x-1/2 -translate-y-1/2"
+              className="group absolute w-[14%] -translate-x-1/2 -translate-y-1/2 transition hover:scale-110"
+              title={it.label}
             >
-              <div
-                className={`flex h-20 w-20 items-center justify-center rounded-xl border-2 text-4xl shadow-lg transition ${
-                  done
-                    ? "border-emerald-500/50 bg-emerald-50/80 opacity-70"
-                    : "border-amber-300 bg-white hover:scale-110"
-                }`}
-              >
-                {it.icon}
+              <div className={`relative ${done ? "opacity-60" : ""}`}>
+                {Svg ? <Svg /> : <span className="text-5xl">{it.icon}</span>}
                 {!done && (
-                  <span className="absolute inset-0 -z-10 animate-ping rounded-xl border-2 border-amber-300" />
+                  <span className="pointer-events-none absolute inset-0 -z-10 animate-ping rounded-2xl border-2 border-[oklch(0.80_0.135_80)]" />
                 )}
                 {done && (
-                  <span className="absolute -right-1 -top-1 rounded-full bg-emerald-500 px-1 text-[10px] text-white">
+                  <span className="absolute -right-1 -top-1 rounded-full bg-[oklch(0.58_0.08_145)] px-1.5 text-[10px] text-white">
                     ✓
                   </span>
                 )}
               </div>
-              <div className="mt-1 rounded bg-slate-900/70 px-1.5 py-0.5 text-center text-[10px] text-white">
+              <div className="mt-1 rounded bg-[#3E2F2A]/85 px-1.5 py-0.5 text-center text-[10px] text-white">
                 {it.label}
               </div>
             </button>
           );
         })}
 
-        {/* 通往下一关的门 + 柜子 + 许愿瓶 */}
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-end gap-2">
+        {/* 通往下一关的门 + 许愿瓶 */}
+        <div className="absolute right-2 top-1/2 flex -translate-y-1/2 items-end gap-2">
           <Bottle
             placed={placed.length}
             total={fragmentOrder.length}
@@ -124,16 +137,14 @@ export function Room3({ onComplete }: { onComplete: () => void }) {
             onDropFragment={(f) => tryPlace(f)}
             onClick={() => picked && tryPlace(picked)}
           />
-          <div className="flex flex-col items-center">
-            <div className="h-24 w-12 rounded-t-md border-2 border-amber-900 bg-gradient-to-b from-amber-800 to-amber-950 shadow-2xl">
-              <div className="absolute right-2 top-12 h-1.5 w-1.5 rounded-full bg-yellow-300" />
-            </div>
-            <span className="mt-1 text-[10px] text-slate-700">最终页 →</span>
+          <div className="w-[60px]">
+            <IsoDoor locked={!allPlaced} />
+            <p className="mt-1 text-center text-[10px] text-[#3E2F2A]/80">最终页 →</p>
           </div>
         </div>
 
         {/* 氛围文字 */}
-        <p className="pointer-events-none absolute left-3 bottom-2 max-w-xs text-[10px] italic text-slate-700/80">
+        <p className="pointer-events-none absolute left-3 bottom-2 max-w-xs text-[10px] italic text-[#3E2F2A]/70">
           {meta.ambient}
         </p>
       </div>
@@ -249,10 +260,7 @@ function Bottle({
 
   return (
     <div
-      onDragOver={(e) => {
-        e.preventDefault();
-        setOver(true);
-      }}
+      onDragOver={(e) => { e.preventDefault(); setOver(true); }}
       onDragLeave={() => setOver(false)}
       onDrop={(e) => {
         e.preventDefault();
@@ -261,39 +269,13 @@ function Bottle({
         if (f) onDropFragment(f);
       }}
       onClick={onClick}
-      className={`relative flex h-32 w-20 cursor-pointer flex-col items-center justify-end rounded-t-3xl rounded-b-xl border-2 transition ${
-        over
-          ? "border-primary"
-          : allPlaced
-            ? "border-amber-400"
-            : "border-amber-200/70"
-      }`}
-      style={{
-        background: lit
-          ? "linear-gradient(180deg, rgba(255,236,170,.6), rgba(255,200,120,.45))"
-          : "linear-gradient(180deg, rgba(200,200,210,.35), rgba(120,120,140,.35))",
-        boxShadow: allPlaced
-          ? "0 0 30px 4px rgba(251,191,36,.7)"
-          : lit
-            ? "0 0 16px 2px rgba(251,191,36,.35)"
-            : "0 4px 12px rgba(0,0,0,.2)",
-      }}
+      className={`relative flex w-[70px] cursor-pointer flex-col items-center transition ${over ? "scale-105" : ""}`}
       title={ready ? "把碎片放进来" : "还需要更多碎片"}
     >
-      {/* 瓶口 */}
-      <div className="absolute -top-2 left-1/2 h-3 w-8 -translate-x-1/2 rounded-t-md border-2 border-amber-700 bg-amber-800" />
-      {/* 进度 */}
-      <div className="mb-2 text-center text-[10px] font-semibold text-amber-900">
+      <IsoBottle lit={lit} filled={allPlaced} className="w-full" />
+      <div className="-mt-2 rounded bg-[#3E2F2A]/85 px-1.5 py-0.5 text-[10px] font-semibold text-white">
         {placed} / {total}
       </div>
-      {/* 星星 */}
-      {allPlaced && (
-        <>
-          <span className="absolute -top-4 left-1 animate-bounce text-lg">✨</span>
-          <span className="absolute -top-6 right-0 animate-pulse text-lg">⭐</span>
-          <span className="absolute -top-3 -right-3 animate-bounce text-lg">🌟</span>
-        </>
-      )}
     </div>
   );
 }

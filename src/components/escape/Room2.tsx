@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { ROOM_2_DATA, type Exhibit } from "./config";
 import { Modal } from "./ui";
+import { IsoDisplayCase, IsoDoor } from "./iso";
 
 /**
  * 房间 2：礼物档案室
@@ -94,33 +95,27 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
 
       {/* 展览馆俯视 */}
       <div
-        className="relative w-full overflow-hidden rounded-3xl border border-border shadow-2xl"
+        className="relative w-full overflow-hidden rounded-3xl border-2 border-[oklch(0.45_0.06_45)] shadow-2xl"
         style={{
           aspectRatio: "16 / 9",
           background:
-            "radial-gradient(ellipse at 50% 40%, oklch(0.85 0.06 75) 0%, oklch(0.60 0.07 55) 60%, oklch(0.38 0.05 45) 100%)",
+            "radial-gradient(ellipse at 50% 30%, oklch(0.55 0.08 60) 0%, oklch(0.38 0.06 50) 60%, oklch(0.24 0.04 45) 100%)",
         }}
       >
-        {/* 木地板纹理 */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "repeating-linear-gradient(90deg, transparent 0 80px, rgba(0,0,0,.08) 80px 82px), repeating-linear-gradient(0deg, transparent 0 60px, rgba(0,0,0,.06) 60px 62px)",
-          }}
-        />
+        {/* 木地板 */}
+        <div className="absolute inset-0 wood-floor opacity-95" />
+        {/* 顶部聚光 */}
+        <div className="pointer-events-none absolute left-1/2 top-0 h-40 w-[90%] -translate-x-1/2 rounded-full bg-[oklch(0.92_0.075_85)] opacity-30 blur-3xl" />
         {/* 中央地毯 */}
-        <div className="absolute left-1/2 top-1/2 h-[55%] w-[55%] -translate-x-1/2 -translate-y-1/2 rounded-md border-2 border-amber-900/40 bg-amber-100/30" />
+        <div className="absolute left-1/2 top-1/2 h-[60%] w-[55%] -translate-x-1/2 -translate-y-1/2 rounded-lg border-2 border-[oklch(0.40_0.05_45)] bg-[oklch(0.86_0.07_80)]/30" />
         {/* 通往下一关的门 */}
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col items-center">
-          <div className="h-20 w-12 rounded-t-md border-2 border-amber-900 bg-gradient-to-b from-amber-800 to-amber-950 shadow-2xl">
-            <div className="absolute right-1 top-10 h-1.5 w-1.5 rounded-full bg-yellow-300" />
-          </div>
-          <span className="mt-1 text-[10px] text-amber-50/80">下一间 →</span>
+        <div className="absolute right-2 top-1/2 w-[10%] -translate-y-1/2">
+          <IsoDoor locked={!solved} />
+          <p className="mt-1 text-center text-[10px] text-amber-50/80">下一间 →</p>
         </div>
 
         {/* 氛围文字 */}
-        <p className="pointer-events-none absolute left-1/2 top-1/2 max-w-xs -translate-x-1/2 -translate-y-1/2 text-center text-xs italic text-amber-900/70">
+        <p className="pointer-events-none absolute left-1/2 top-[88%] max-w-md -translate-x-1/2 text-center text-[11px] italic text-amber-100/70">
           {meta.ambient}
         </p>
 
@@ -132,14 +127,9 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
               key={ex.id}
               onClick={() => setOpenExhibit(ex)}
               style={{ left: `${p.x}%`, top: `${p.y}%` }}
-              className="group absolute -translate-x-1/2 -translate-y-1/2"
+              className="group absolute w-[9%] -translate-x-1/2 -translate-y-1/2 transition hover:scale-110 hover:z-10"
             >
-              <div className="flex h-16 w-16 flex-col items-center justify-center rounded-md border-2 border-amber-100/80 bg-white/85 text-3xl shadow-lg transition hover:scale-110 hover:border-primary">
-                <span>{ex.icon}</span>
-              </div>
-              <div className="mt-1 rounded bg-slate-900/70 px-1 py-0.5 text-center text-[10px] text-white">
-                展品{ex.no}
-              </div>
+              <IsoDisplayCase icon={ex.icon} no={ex.no} />
             </button>
           );
         })}
