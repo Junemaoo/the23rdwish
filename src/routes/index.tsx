@@ -11,12 +11,12 @@ import { Fade, ProgressDots } from "@/components/escape/ui";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "小毛子独家定制密室 · 第23次许愿" },
+      { title: "第23次许愿 · 定制线上密室逃脱" },
       {
         name: "description",
         content: "一间为生日准备的温暖小密室：三个房间，五件礼物，和一个只属于你的愿望。",
       },
-      { property: "og:title", content: "小毛子独家定制密室 · 第23次许愿" },
+      { property: "og:title", content: "第23次许愿 · 定制线上密室逃脱" },
       { property: "og:description", content: "为你定制的生日互动密室。推开门，慢慢走。" },
     ],
   }),
