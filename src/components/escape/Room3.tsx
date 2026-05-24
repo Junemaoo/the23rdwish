@@ -260,10 +260,7 @@ function Bottle({
 
   return (
     <div
-      onDragOver={(e) => {
-        e.preventDefault();
-        setOver(true);
-      }}
+      onDragOver={(e) => { e.preventDefault(); setOver(true); }}
       onDragLeave={() => setOver(false)}
       onDrop={(e) => {
         e.preventDefault();
@@ -272,39 +269,13 @@ function Bottle({
         if (f) onDropFragment(f);
       }}
       onClick={onClick}
-      className={`relative flex h-32 w-20 cursor-pointer flex-col items-center justify-end rounded-t-3xl rounded-b-xl border-2 transition ${
-        over
-          ? "border-primary"
-          : allPlaced
-            ? "border-amber-400"
-            : "border-amber-200/70"
-      }`}
-      style={{
-        background: lit
-          ? "linear-gradient(180deg, rgba(255,236,170,.6), rgba(255,200,120,.45))"
-          : "linear-gradient(180deg, rgba(200,200,210,.35), rgba(120,120,140,.35))",
-        boxShadow: allPlaced
-          ? "0 0 30px 4px rgba(251,191,36,.7)"
-          : lit
-            ? "0 0 16px 2px rgba(251,191,36,.35)"
-            : "0 4px 12px rgba(0,0,0,.2)",
-      }}
+      className={`relative flex w-[70px] cursor-pointer flex-col items-center transition ${over ? "scale-105" : ""}`}
       title={ready ? "把碎片放进来" : "还需要更多碎片"}
     >
-      {/* 瓶口 */}
-      <div className="absolute -top-2 left-1/2 h-3 w-8 -translate-x-1/2 rounded-t-md border-2 border-amber-700 bg-amber-800" />
-      {/* 进度 */}
-      <div className="mb-2 text-center text-[10px] font-semibold text-amber-900">
+      <IsoBottle lit={lit} filled={allPlaced} className="w-full" />
+      <div className="-mt-2 rounded bg-[#3E2F2A]/85 px-1.5 py-0.5 text-[10px] font-semibold text-white">
         {placed} / {total}
       </div>
-      {/* 星星 */}
-      {allPlaced && (
-        <>
-          <span className="absolute -top-4 left-1 animate-bounce text-lg">✨</span>
-          <span className="absolute -top-6 right-0 animate-pulse text-lg">⭐</span>
-          <span className="absolute -top-3 -right-3 animate-bounce text-lg">🌟</span>
-        </>
-      )}
     </div>
   );
 }
