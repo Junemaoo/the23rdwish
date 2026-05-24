@@ -4,6 +4,7 @@ import { OPENING, ROOMS } from "@/components/escape/config";
 import { Room1 } from "@/components/escape/Room1";
 import { Room2 } from "@/components/escape/Room2";
 import { Room3 } from "@/components/escape/Room3";
+import { Chapter } from "@/components/escape/Chapter";
 import { Finale } from "@/components/escape/Finale";
 import { Fade, ProgressDots } from "@/components/escape/ui";
 
@@ -13,75 +14,88 @@ export const Route = createFileRoute("/")({
       { title: "小毛子独家定制密室 · 第23次许愿" },
       {
         name: "description",
-        content:
-          "一间为生日准备的温暖小密室：三个房间，五件礼物，和一个只属于你的愿望。",
+        content: "一间为生日准备的温暖小密室：三个房间，五件礼物，和一个只属于你的愿望。",
       },
       { property: "og:title", content: "小毛子独家定制密室 · 第23次许愿" },
-      {
-        property: "og:description",
-        content: "为你定制的生日互动密室。推开门，慢慢走。",
-      },
+      { property: "og:description", content: "为你定制的生日互动密室。推开门，慢慢走。" },
     ],
   }),
   component: Index,
 });
 
-type Stage = "opening" | "room" | "finale";
+type Stage =
+  | "intro"
+  | "chapter1" | "room1"
+  | "chapter2" | "room2"
+  | "chapter3" | "room3"
+  | "final";
+
+// 流程顺序，用于"下一步"与进度
+const FLOW: Stage[] = [
+  "intro",
+  "chapter1", "room1",
+  "chapter2", "room2",
+  "chapter3", "room3",
+  "final",
+];
 
 function Index() {
-  const [stage, setStage] = useState<Stage>("opening");
-  const [roomIdx, setRoomIdx] = useState(0);
+  const [stage, setStage] = useState<Stage>("intro");
 
-  function start() {
-    setRoomIdx(0);
-    setStage("room");
+  function go(next: Stage) {
+    setStage(next);
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   }
-  function nextRoom() {
-    if (roomIdx + 1 < ROOMS.length) setRoomIdx(roomIdx + 1);
-    else setStage("finale");
-  }
-  function restart() {
-    setStage("opening");
-  }
+
+  // 当前进度（仅基于房间编号 1..3，加最终页）
+  const roomNum =
+    stage === "room1" || stage === "chapter1" ? 1 :
+    stage === "room2" || stage === "chapter2" ? 2 :
+    stage === "room3" || stage === "chapter3" ? 3 :
+    stage === "final" ? 4 : 0;
 
   return (
     <main className="min-h-screen bg-background">
-      {/* 顶部进度 */}
-      {stage !== "opening" && (
-        <div className="sticky top-0 z-30 flex items-center justify-between border-b border-border/50 bg-background/80 px-4 py-3 backdrop-blur">
+      {stage !== "intro" && (
+        <div className="sticky top-0 z-30 flex items-center justify-between border-b border-border/50 bg-background/85 px-4 py-3 backdrop-blur">
           <span className="font-serif text-sm text-foreground">
             小毛子 · 第 23 次许愿
           </span>
-          <ProgressDots
-            step={stage === "finale" ? ROOMS.length + 1 : roomIdx + 1}
-            total={ROOMS.length + 1}
-          />
+          <ProgressDots step={roomNum} total={4} />
         </div>
       )}
 
-      {stage === "opening" && (
-        <Fade k="opening">
-          <Opening onStart={start} />
-        </Fade>
+      {stage === "intro" && (
+        <Fade k="intro"><Opening onStart={() => go("chapter1")} /></Fade>
       )}
 
-      {stage === "room" && (
-        <Fade k={`room-${roomIdx}`}>
-          {roomIdx === 0 ? (
-            <Room1 onComplete={nextRoom} />
-          ) : roomIdx === 1 ? (
-            <Room2 onComplete={nextRoom} />
-          ) : (
-            <Room3 onComplete={nextRoom} />
-          )}
-        </Fade>
+      {stage === "chapter1" && (
+        <Fade k="ch1"><Chapter index={0} onEnter={() => go("room1")} /></Fade>
+      )}
+      {stage === "room1" && (
+        <Fade k="r1"><Room1 onComplete={() => go("chapter2")} /></Fade>
       )}
 
-      {stage === "finale" && (
-        <Fade k="finale">
-          <Finale onRestart={restart} />
-        </Fade>
+      {stage === "chapter2" && (
+        <Fade k="ch2"><Chapter index={1} onEnter={() => go("room2")} /></Fade>
       )}
+      {stage === "room2" && (
+        <Fade k="r2"><Room2 onComplete={() => go("chapter3")} /></Fade>
+      )}
+
+      {stage === "chapter3" && (
+        <Fade k="ch3"><Chapter index={2} onEnter={() => go("room3")} /></Fade>
+      )}
+      {stage === "room3" && (
+        <Fade k="r3"><Room3 onComplete={() => go("final")} /></Fade>
+      )}
+
+      {stage === "final" && (
+        <Fade k="final"><Finale onRestart={() => go("intro")} /></Fade>
+      )}
+
+      {/* 触发未使用 ROOMS 变量类型检查 */}
+      <span className="hidden">{ROOMS.length}</span>
     </main>
   );
 }
@@ -92,18 +106,17 @@ function Opening({ onStart }: { onStart: () => void }) {
       className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 text-center"
       style={{
         background:
-          "radial-gradient(ellipse at 50% 30%, oklch(0.28 0.05 250) 0%, oklch(0.18 0.03 250) 50%, oklch(0.12 0.02 250) 100%)",
+          "radial-gradient(ellipse at 50% 30%, oklch(0.32 0.05 250) 0%, oklch(0.20 0.04 250) 55%, oklch(0.13 0.03 250) 100%)",
       }}
     >
-      {/* 星点 */}
-      <div className="pointer-events-none absolute inset-0 opacity-40 [background-image:radial-gradient(white_1px,transparent_1px)] [background-size:48px_48px]" />
-      <div className="relative z-10 mb-8 text-6xl drop-shadow-[0_0_20px_rgba(251,191,36,.6)]">
+      <div className="pointer-events-none absolute inset-0 opacity-30 [background-image:radial-gradient(white_1px,transparent_1px)] [background-size:48px_48px]" />
+      <div className="relative z-10 mb-6 text-6xl drop-shadow-[0_0_24px_rgba(245,196,94,.7)]">
         🕯️
       </div>
-      <h1 className="relative z-10 font-serif text-4xl text-slate-50 sm:text-5xl">
+      <h1 className="relative z-10 font-serif text-4xl text-[oklch(0.96_0.045_92)] sm:text-5xl">
         {OPENING.title}
       </h1>
-      <p className="relative z-10 mt-3 text-lg text-amber-300">
+      <p className="relative z-10 mt-3 text-lg text-[oklch(0.80_0.135_80)]">
         {OPENING.subtitle}
       </p>
       <div className="relative z-10 mt-8 max-w-md space-y-2 text-sm leading-relaxed text-slate-300">
@@ -113,13 +126,10 @@ function Opening({ onStart }: { onStart: () => void }) {
       </div>
       <button
         onClick={onStart}
-        className="relative z-10 mt-10 rounded-full bg-amber-400 px-10 py-3.5 text-sm font-medium text-slate-900 shadow-[0_0_30px_rgba(251,191,36,.4)] transition hover:scale-105 hover:bg-amber-300"
+        className="relative z-10 mt-10 rounded-full bg-[oklch(0.80_0.135_80)] px-10 py-3.5 text-sm font-semibold text-[#3E2F2A] shadow-[0_0_30px_rgba(245,196,94,.4)] transition hover:scale-105 hover:bg-[oklch(0.85_0.135_80)]"
       >
         {OPENING.enterCta}
       </button>
-      <p className="relative z-10 mt-6 text-xs text-slate-400">
-        建议在桌面浏览器中游玩 · 全程约 5–10 分钟
-      </p>
     </section>
   );
 }
