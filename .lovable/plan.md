@@ -1,24 +1,41 @@
-## 问题诊断
+# 房间 1：物件特写 + 线索收集
 
-- `Room1` 容器用 `fixed inset-0 z-0`，但在 `src/routes/index.tsx` 里它被 `<Fade k="r1">` 包裹，`Fade` 的 div 使用 `transition-all` 并带 `translate-y` —— CSS transform 会让内部 `position: fixed` 子元素相对该 transform 容器定位（而不是 viewport）。`Fade` 自身没显式高度，导致 Room1 整张图被压成 0 高，页面看起来空白。
-- 同时上一个改动里数字密码锁的热点坐标 `left: 56%, top: 52%` 偏右，离背景图里的木门稍远。
+## 1. 生成两张新的物件特写图（深色背景）
 
-## 修复方案
+- `src/assets/room1-laptop.jpg`：你在伦敦的笔记本特写，锁屏显示 `05:20`，壁纸是海边照片，黑色背景，电影感打光。
+- `src/assets/room1-desktop.jpg`：北京工位的台式机特写，屏幕显示 `14:20`，旁边摆几只 Labubu，黑色背景。
+- 已有的 `room1-calendar.jpg` 复用，作为日历的特写图。
 
-### 1. Room1 容器改为正常块级全屏（不再用 fixed）
-- 把 `fixed inset-0 z-0 overflow-hidden bg-black` 改为 `relative w-full min-h-[100svh] overflow-hidden bg-black`。
-- 底图 `<img>` 继续 `absolute inset-0 h-full w-full object-cover`，让它填满容器。
-- 所有热点的 `absolute` + 百分比定位天然就以这个容器为基准，无需调整。
-- 这样不依赖 viewport 定位，Fade 的 transform 不再破坏布局；顶部 sticky 进度条也能正常浮在上面。
+## 2. Room1.tsx 改造
 
-### 2. 密码锁热点向门靠近
-- 当前：`left: 56%, top: 52%, w: 5%, h: 12%`。
-- 调整为：`left: 50%, top: 48%, w: 6%, h: 14%`（更贴近背景图中央木门右侧门框/把手位置）。
-- 仅改 `Room1.tsx` 里那个 `<button>` 的内联 style，其它热点不动。
+### 物件特写 Modal
+- 在 `hotspots` 数组里给每个热点加一个 `image` 字段，分别指向上面三张图。
+- 不再使用 `ui.tsx` 里的通用 `Modal`（它带有"知道了"按钮和文字标题）。在 Room1 内部新建一个 `ClueModal`：
+  - 全屏暗色背景 `bg-black/85`，点击空白处或按 Esc 关闭。
+  - 中央展示一张大图，圆角 + 阴影，最多 `max-w-2xl`。
+  - **完全不显示** `clueTitle` / `clueText`。
+  - 底部一个按钮"收集线索"，点击后把该 hotspot 加入"已收集"列表并关闭弹窗。如果已经收集过，按钮变成"已收集 ✓" 且 disabled。
 
-### 3. （不动）背景图、日历图、答题流程、Modal、config 均保持不变。
+### 线索状态
+- 用 `useState<Set<string>>` 保存已收集的 hotspot id（`pc-left` / `pc-right` / `calendar`）。
+
+### 左上角线索图标
+- 在房间容器内、绝对定位 `top-4 left-4 z-20`，一个圆形按钮，里头放 lucide `Notebook` 或 `BookOpen` 图标，右上角小角标显示 `已收集/3`。
+- 点击打开一个新的 `InventoryModal`：暗色面板，列出三个槽位。
+  - 已收集的：显示该物件的小缩略图（同一张特写图 thumbnail）+ 物件名称（用 `cfg.label`，例如"你的笔记本"）。
+  - 未收集的：灰色问号占位 `?`，文字"尚未发现"。
+- 这里**也不显示**任何线索文字（保持纯探索氛围），只展示图本身——线索靠玩家自己看图领悟。
+
+### 密码锁热点保持不动
+- 现有的密码锁按钮、答题 Modal、成功 Modal 全部保留不动。
+
+## 3. 不动的部分
+- `config.ts` 不动（`clueText` 字段保留着，目前只是不再渲染，方便以后改回）。
+- `ui.tsx` 的通用 `Modal` 不动，仍给密码锁/成功页用。
+- 其它房间、路由、顶部进度条全部不动。
 
 ## QA
-- 浏览器打开 `/`，点开场 → 章节 1 → 进入房间 1，确认能看到完整房间图。
-- 鼠标移到门附近的密码锁区域，能弹出答题 Modal。
-- 点笔记本/台式机/日历三个热点能弹出对应线索；日历 Modal 仍展示生成的日历图。
+- 进入房间 1，点三个物件，分别看到三张暗色背景下的特写图，没有任何文字，只有"收集线索"按钮。
+- 收集后按钮变 "已收集 ✓"，左上角角标 `1/3 → 2/3 → 3/3`。
+- 点左上角图标弹出收集册，已收集位显示缩略图，未收集位显示 `?`。
+- 密码锁按钮、答题、过关流程不受影响。
