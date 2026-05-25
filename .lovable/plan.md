@@ -1,36 +1,44 @@
 ## 目标
-把房间1当前由 SVG 拼出的"假房间"替换成一张高保真 2.5D 微缩房间渲染图，作为静态背景，再在图上叠加 4 个透明可点击热点；日历区域单独换成带爱心标记的图片以契合谜题。
+1. 重新生成房间1主背景图：拓宽中间走廊，同时容纳数字密码锁和墙上日历；删除左右房间外侧的门。
+2. 重新生成日历图：参考用户上传的 Risotto Studio 月历风格（大号月份字母、网格、彩色印刷感），但**抹去所有日期数字**，仅在中上某一天格子里画一个手绘红色爱心。
+3. 房间页面改为纯沉浸式：去掉标题、副标题、"房间 1/3"、底部提示文字、进度条、ambient 文字、`HotspotRing` 发光环——背景图占满整屏，玩家完全靠自行点击探索热点。
 
-## 实现步骤
+## 实施步骤
 
-### 1. 生成两张图片
-用 `imagegen--generate_image`（premium 档，jpg 16:9）生成：
+### 1. 重新生成 `src/assets/room1-bg.jpg`
+prompt 调整：
+- 2.5D isometric dollhouse cutaway, 16:9。
+- 左半：英国学生公寓（蓝床、UCL 海报、长书桌+笔记本屏 "05:20"、小厨房）。**左外墙整面砖墙/壁纸，无外门。**
+- **中间走廊加宽至约整图 22% 宽度**：左侧墙挂木质相框日历（约占走廊上半），右侧墙装数字密码键盘（约占走廊下半，键盘清晰可见），中间地面木地板+吊灯，走廊尽头一扇通往下一房间的木门（保留中间门，这是密室门）。
+- 右半：工位（iMac 屏 "14:20"、一排 Labubu）+ 健身房（跑步机、卧推凳）。**右外墙整面墙，无外门。**
+- 暖色木地板、柔和暖光、灰色房屋外壳，无文字噪点。
 
-**a) `src/assets/room1-bg.jpg`** —— 房间1主背景  
-prompt 要点：以用户上传图为参考重新创作，2.5D isometric dollhouse cutaway，16:9 宽幅；左半 = 英国学生公寓（蓝床单/鹅黄被子/红方格枕、长书桌+笔记本屏幕显示"05:20"、UCL 紫色海报、小冰箱+灶台+水池+多彩蔬菜、衣柜、台灯、墙面黑板拍立得）；中间 = 木门+数字密码锁+小走廊吊灯；右半 = 工位（iMac 显示"14:20"、Labubu 一排、办公椅）+ 健身房（跑步机、卧推凳、哑铃）；暖色木地板、柔和暖光、灰色房屋外壳；干净、无文字噪点。
+### 2. 重新生成 `src/assets/room1-calendar.jpg`
+参考用户上传的 Risotto Studio 月历视觉：
+- 单张挂历近景特写，顶部金属线圈，奶白纸张。
+- 顶部超大粗体月份缩写字母（如 "SEP"，绿色印刷），左上角小字 "SEPTEMBER"，右上角小号月份编号。
+- 下方 7 列日历网格（M T W T F SAT SUN 表头紫色横条），**所有日期格子完全留空，不写任何数字**。
+- **仅在中上部分某一天的格子中央，用红色马克笔手绘一个爱心 ❤**（其它格子纯白）。
+- 紫绿双色印刷质感、轻微 risograph 颗粒、2.5D 微缩拍摄角度。
 
-**b) `src/assets/room1-calendar.jpg`** —— 点击日历后弹窗用图  
-prompt：单张木质相框日历近景，月份格子里某一格用马克笔画着红色爱心，其它格子留白不写数字；2.5D 微缩风、暖色调。
+### 3. 改写 `src/components/escape/Room1.tsx`（沉浸式）
+- 删除：`<header>` 标题区、"已发现线索 x/y" 提示、底部 ambient 浮条、`HotspotRing` 调用、找到后的 ✓ 角标。
+- 容器改为全宽：`w-screen h-screen` 或 `fixed inset-0`，背景图 `object-cover` 占满；`AnswerInput` 和成功 Modal 浮在底部/中央。
+- 热点：保留 4 个透明 `<button>`（笔记本、台式机、日历、密码锁），**无任何视觉提示**（无环、无 hover 描边、无 label），仅保留 `title` 供无障碍。
+- 重新校准热点百分比坐标以匹配新底图（走廊加宽后：日历约 `left: 41% top: 18% w: 10% h: 16%`，密码锁约 `left: 44% top: 42% w: 7% h: 10%`，左笔记本和右台式机按新构图微调）。
+- 日历 Modal 内容保留：展示新生成的 `room1-calendar.jpg` + clueText。
+- 解谜/答题/`onComplete` 流程不变。
 
-### 2. 重写 `src/components/escape/Room1.tsx`
-- 删除所有 `Iso*` 组件和 `RoomBox`、`Badge` 拼装代码。
-- 用单个相对定位容器，`<img src={room1Bg}>` 作为底图，`aspectRatio: 16/9`。
-- 叠加 4 个绝对定位的透明 `<button>` 热点（用百分比定位，配现有 `HotspotRing` 发光环）：
-  - 左侧笔记本 → `pc-left`（线索 520）
-  - 右侧台式机 → `pc-right`（线索 1420）
-  - 中间日历 → `calendar`（线索：爱心方格，弹窗里展示生成的日历图）
-  - 中间门旁密码锁 → 触发 `AnswerInput` 聚焦
-- 解谜逻辑、`AnswerInput`、`Modal`、`onComplete` 流程保持不变；继续读取 `ROOMS[0]` 的 hotspots / answer / 错误文案。
-- 日历 Modal 内容除原有 `clueText` 外，额外渲染 `room1-calendar.jpg` 缩略图。
+### 4. （可选，后续）Room2/Room3 / Chapter 页
+本次只动 Room1。若用户后续要求 Room2/Room3 也沉浸式，同样模式套用。本计划暂不改动它们以及 `Chapter.tsx`、`config.ts`、路由、`iso.tsx`。
 
-### 3. 不动的部分
-- `iso.tsx` 保留（房间2/3/最终页仍依赖它）。
-- `config.ts`、路由、章节页、`AnswerInput`、进度条均不变。
-
-### 4. QA
-生成后用 `code--view` 查看两张图确认构图正确；预览页核对四个热点位置与底图对齐。若某热点偏移，仅调整百分比坐标，不重生成图片。
+### 5. QA
+- `code--view` 查看两张新图：确认走廊加宽、外门移除、日历空白+爱心。
+- 预览页核对 4 个热点位置；偏移则只调百分比，不重生成图。
+- 浏览器查看 Room1 是否真正全屏沉浸、无任何文字/发光提示。
 
 ## 技术说明
-- 图片走 ES6 import：`import room1Bg from "@/assets/room1-bg.jpg"`。
-- 热点用 `absolute inset-0` 容器 + 百分比 `left/top/width/height`，确保随底图缩放。
+- 图片 ES6 import 不变。
+- 全屏容器用 `fixed inset-0 overflow-hidden`，内部 `<img class="absolute inset-0 w-full h-full object-cover">`；`AnswerInput` 用 `absolute bottom-6 left-1/2 -translate-x-1/2 w-[min(90%,420px)]`。
+- 热点 `<button>` 仅 `absolute` 定位 + 透明背景，无任何 className 视觉样式。
 - 不引入新依赖。
