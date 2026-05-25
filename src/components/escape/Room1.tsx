@@ -1,16 +1,13 @@
 import { useState } from "react";
 import { ROOMS, type Hotspot as HotspotType } from "./config";
 import { Modal, AnswerInput } from "./ui";
-import {
-  IsoFridge, IsoStove, IsoSink, IsoVeggies, IsoWardrobe, IsoBed, IsoDesk,
-  IsoLaptop, IsoLamp, IsoWindow, IsoBlackboard, IsoCalendar, IsoMonitor,
-  IsoLabubu, IsoTreadmill, IsoDumbbell, IsoBench, IsoDoor, HotspotRing,
-} from "./iso";
+import { HotspotRing } from "./iso";
+import room1Bg from "@/assets/room1-bg.jpg";
+import room1Calendar from "@/assets/room1-calendar.jpg";
 
 /**
  * 房间 1：我们，在世界的两端
- * 2.5D dollhouse：左 = 伦敦公寓 / 中 = 长廊 + 密码门 + 日历 / 右 = 工位 + 健身房
- * 全部主体家具为 isometric SVG。
+ * 高保真 2.5D 微缩房间渲染图 + 四个透明热点
  */
 export function Room1({ onComplete }: { onComplete: () => void }) {
   const config = ROOMS[0];
@@ -24,6 +21,13 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
   }
   const found = (id: string) => foundIds.includes(id);
 
+  // 热点位置（百分比，相对 16:9 底图）
+  const hotspots = [
+    { id: "pc-left",  cfg: config.hotspots[0], left: 12,   top: 38, w: 12, h: 14, label: "笔记本" },
+    { id: "pc-right", cfg: config.hotspots[1], left: 72.5, top: 30, w: 13, h: 16, label: "台式机" },
+    { id: "calendar", cfg: config.hotspots[2], left: 50.5, top: 11, w: 9,  h: 14, label: "走廊上的日历" },
+  ] as const;
+
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6">
       <header className="text-center">
@@ -35,119 +39,87 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
       </header>
 
       <div
-        className="relative w-full overflow-hidden rounded-3xl border border-[oklch(0.5_0.05_45)] shadow-2xl"
-        style={{
-          aspectRatio: "16 / 9",
-          background:
-            "linear-gradient(180deg, oklch(0.32 0.04 250) 0%, oklch(0.24 0.03 250) 55%, oklch(0.18 0.03 250) 100%)",
-        }}
+        className="relative w-full overflow-hidden rounded-3xl border border-[oklch(0.5_0.05_45)] shadow-2xl bg-[oklch(0.18_0.02_60)]"
+        style={{ aspectRatio: "1536 / 1024" }}
       >
-        {/* 木地板 */}
-        <div className="absolute inset-x-0 bottom-0 h-[44%] wood-floor" />
+        <img
+          src={room1Bg}
+          alt="2.5D 微缩房间：左侧伦敦学生公寓，中间走廊和密码门，右侧工位与健身房"
+          className="absolute inset-0 h-full w-full select-none object-cover"
+          draggable={false}
+        />
 
-        {/* ===== 左侧：伦敦公寓 ===== */}
-        <RoomBox side="left" tone="warm">
-          <Badge className="left-2 top-2 bg-[#5B2B82]">UCL · 伦敦</Badge>
-          <IsoWindow className="absolute left-[6%] top-[6%] w-[28%]" />
-          <IsoFridge className="absolute left-[34%] top-[12%] w-[18%]" />
-          <IsoStove className="absolute left-[55%] top-[14%] w-[22%]" />
-          <IsoSink className="absolute left-[78%] top-[16%] w-[18%]" />
-          <IsoVeggies className="absolute left-[42%] top-[34%] w-[28%]" />
-          <IsoWardrobe className="absolute left-[6%] top-[36%] w-[18%]" />
-          <IsoBed className="iso-shadow absolute left-[26%] top-[52%] w-[44%] shadow-md" />
-          <IsoDesk className="absolute left-[6%] bottom-[4%] w-[88%]" />
-          <IsoLamp className="absolute left-[8%] bottom-[12%] w-[14%]" />
-          <IsoBlackboard className="absolute left-[68%] top-[40%] w-[28%]" />
-          {/* 电脑 — 热点 */}
+        {hotspots.map((h) => (
           <button
-            onClick={() => openHotspot(config.hotspots[0])}
-            className="group absolute left-[38%] bottom-[10%] w-[22%]"
-            title="你的笔记本"
+            key={h.id}
+            onClick={() => openHotspot(h.cfg)}
+            className="group absolute"
+            style={{
+              left: `${h.left}%`,
+              top: `${h.top}%`,
+              width: `${h.w}%`,
+              height: `${h.h}%`,
+            }}
+            title={h.label}
+            aria-label={h.label}
           >
-            <IsoLaptop time="05:20" />
-            {!found("pc-left") && <HotspotRing />}
-            {found("pc-left") && (
-              <span className="absolute -right-1 -top-1 rounded-full bg-[oklch(0.58_0.08_145)] px-1.5 text-[10px] text-white">✓</span>
+            {!found(h.id) && <HotspotRing />}
+            {found(h.id) && (
+              <span className="absolute -right-1 -top-1 rounded-full bg-[oklch(0.58_0.08_145)] px-1.5 text-[10px] font-semibold text-white shadow">
+                ✓
+              </span>
             )}
           </button>
-        </RoomBox>
+        ))}
 
-        {/* ===== 中间：走廊 + 门 + 日历 ===== */}
-        <div className="absolute left-1/2 top-[8%] h-[80%] w-[22%] -translate-x-1/2">
-          <div className="absolute inset-x-0 top-0 h-[36%] rounded-t-lg bg-[oklch(0.30_0.04_50)]" />
-          <div className="absolute inset-x-0 bottom-0 top-[36%] bg-gradient-to-b from-[oklch(0.36_0.05_50)] to-[oklch(0.22_0.03_50)]" />
-          <div className="pointer-events-none absolute left-1/2 top-[28%] h-40 w-40 -translate-x-1/2 rounded-full bg-[oklch(0.92_0.075_85)] opacity-40 blur-3xl" />
-          {/* 日历 — 热点 */}
-          <button
-            onClick={() => openHotspot(config.hotspots[2])}
-            className="group absolute left-1/2 top-[4%] w-[60%] -translate-x-1/2"
-            title="走廊尽头的日历"
-          >
-            <IsoCalendar />
-            {!found("calendar") && <HotspotRing />}
-            {found("calendar") && (
-              <span className="absolute -right-1 -top-1 rounded-full bg-[oklch(0.58_0.08_145)] px-1.5 text-[10px] text-white">✓</span>
-            )}
-          </button>
-          {/* 密码门 */}
-          <div className="absolute left-1/2 bottom-[2%] w-[72%] -translate-x-1/2">
-            <IsoDoor locked={!solved} />
-            <p className="mt-1 text-center text-[10px] text-[oklch(0.92_0.075_85)]">⌨ 4 位密码</p>
-          </div>
-        </div>
-
-        {/* ===== 右侧：工位 + 健身房 ===== */}
-        <RoomBox side="right" tone="cool">
-          <Badge className="right-2 top-2 bg-slate-700">我的工位</Badge>
-          {/* 工位区 */}
-          <IsoDesk className="absolute left-[6%] top-[28%] w-[88%]" />
-          <button
-            onClick={() => openHotspot(config.hotspots[1])}
-            className="group absolute left-[18%] top-[12%] w-[30%]"
-            title="我的台式机"
-          >
-            <IsoMonitor time="14:20" />
-            {!found("pc-right") && <HotspotRing />}
-            {found("pc-right") && (
-              <span className="absolute -right-1 -top-1 rounded-full bg-[oklch(0.58_0.08_145)] px-1.5 text-[10px] text-white">✓</span>
-            )}
-          </button>
-          {/* Labubu 一排 */}
-          <div className="absolute right-[6%] top-[18%] flex gap-1">
-            <IsoLabubu className="w-6" color="#E94B3C" />
-            <IsoLabubu className="w-6" color="#5DB0FF" />
-            <IsoLabubu className="w-6" color="#F2C744" />
-          </div>
-          {/* 健身房 */}
-          <div className="absolute left-0 right-0 bottom-0 top-[52%] border-t border-dashed border-white/20">
-            <span className="absolute left-2 top-1 rounded bg-slate-700 px-1.5 py-0.5 text-[9px] text-white">🏋️ 健身房</span>
-            <IsoTreadmill className="absolute left-[6%] top-[28%] w-[44%]" />
-            <IsoBench className="absolute right-[6%] top-[34%] w-[40%]" />
-            <IsoDumbbell className="absolute left-[18%] bottom-[8%] w-[30%]" />
-          </div>
-        </RoomBox>
+        {/* 密码锁热点：滚动到下方输入框 */}
+        <button
+          onClick={() => {
+            const el = document.getElementById("room1-answer");
+            el?.scrollIntoView({ behavior: "smooth", block: "center" });
+          }}
+          className="group absolute"
+          style={{ left: "47%", top: "30%", width: "5%", height: "8%" }}
+          title="数字密码锁"
+          aria-label="数字密码锁"
+        >
+          {!solved && <HotspotRing />}
+        </button>
 
         {/* 氛围文字 */}
-        <p className="pointer-events-none absolute left-1/2 bottom-1 max-w-md -translate-x-1/2 text-center text-[10px] italic text-amber-50/60">
+        <p className="pointer-events-none absolute bottom-2 left-1/2 max-w-md -translate-x-1/2 rounded-full bg-black/40 px-3 py-1 text-center text-[11px] italic text-amber-50/90 backdrop-blur-sm">
           {config.ambient}
         </p>
       </div>
 
       <p className="text-center text-xs text-muted-foreground">
-        已发现线索 {foundIds.length} / {config.hotspots.length} · 点击发光物件
+        已发现线索 {foundIds.length} / {config.hotspots.length} · 点击房间内发光的物件
       </p>
 
-      <AnswerInput
-        prompt={config.puzzlePrompt}
-        hint={config.puzzleHint}
-        answer={config.answer}
-        errorMessages={config.errorMessages}
-        onSolved={() => setSolved(true)}
-      />
+      <div id="room1-answer">
+        <AnswerInput
+          prompt={config.puzzlePrompt}
+          hint={config.puzzleHint}
+          answer={config.answer}
+          errorMessages={config.errorMessages}
+          onSolved={() => setSolved(true)}
+        />
+      </div>
 
       <Modal open={!!openClue} onClose={() => setOpenClue(null)} title={openClue?.clueTitle}>
-        {openClue?.clueText}
+        <div className="space-y-3">
+          {openClue?.id === "calendar" && (
+            <img
+              src={room1Calendar}
+              alt="日历上被红色马克笔画了爱心的方格"
+              loading="lazy"
+              className="mx-auto w-full max-w-sm rounded-xl shadow-lg"
+            />
+          )}
+          <p className="whitespace-pre-line">{openClue?.clueText}</p>
+        </div>
       </Modal>
+
       <Modal open={solved} onClose={onComplete} title="🔓 门开了">
         {config.successText}
       </Modal>
@@ -161,37 +133,5 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
         </button>
       )}
     </div>
-  );
-}
-
-function RoomBox({
-  side, tone, children,
-}: { side: "left" | "right"; tone: "warm" | "cool"; children: React.ReactNode }) {
-  const isLeft = side === "left";
-  return (
-    <div
-      className={`absolute top-[6%] h-[82%] w-[37%] overflow-hidden rounded-xl border-2 border-[oklch(0.45_0.06_45)] shadow-2xl ${
-        tone === "warm" ? "room-wall-warm" : "room-wall-cool"
-      }`}
-      style={{
-        [isLeft ? "left" : "right"]: "2%",
-        transform: isLeft
-          ? "perspective(1100px) rotateY(7deg)"
-          : "perspective(1100px) rotateY(-7deg)",
-        transformOrigin: isLeft ? "right center" : "left center",
-      } as React.CSSProperties}
-    >
-      {/* 房内木地板 */}
-      <div className="absolute inset-x-0 bottom-0 h-[52%] wood-floor opacity-90" />
-      {children}
-    </div>
-  );
-}
-
-function Badge({ children, className }: { children: React.ReactNode; className?: string }) {
-  return (
-    <span className={`absolute z-10 rounded px-2 py-0.5 text-[10px] font-semibold text-white shadow ${className}`}>
-      {children}
-    </span>
   );
 }
