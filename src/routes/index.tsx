@@ -111,7 +111,7 @@ function Opening({ onStart }: { onStart: () => void }) {
     >
       <div className="pointer-events-none absolute inset-0 opacity-30 [background-image:radial-gradient(white_1px,transparent_1px)] [background-size:48px_48px]" />
       <div className="relative z-10 mb-6 text-6xl drop-shadow-[0_0_24px_rgba(245,196,94,.7)]">
-        🕯️
+        ​
       </div>
       <h1 className="relative z-10 font-serif text-4xl text-[oklch(0.96_0.045_92)] sm:text-5xl">
         {OPENING.title}
