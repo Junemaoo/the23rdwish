@@ -21,7 +21,7 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
   ] as const;
 
   return (
-    <div className="fixed inset-0 z-0 overflow-hidden bg-black">
+    <div className="relative w-full min-h-[100svh] overflow-hidden bg-black">
       <img
         src={room1Bg}
         alt=""
@@ -49,7 +49,7 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
       <button
         onClick={() => setShowAnswer(true)}
         className="absolute cursor-pointer bg-transparent"
-        style={{ left: "56%", top: "52%", width: "5%", height: "12%" }}
+        style={{ left: "50%", top: "48%", width: "6%", height: "14%" }}
         title="数字密码锁"
         aria-label="数字密码锁"
       />
