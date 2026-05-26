@@ -97,7 +97,10 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
       setErrMsg("还有空着的卡槽哦，把五件都放进去再确认～");
       return;
     }
-    const ok = slots.every((id, i) => id === correctOrder[i]);
+    const subsetCorrect = [...pickedFive].sort(
+      (a, b) => correctOrder.indexOf(a) - correctOrder.indexOf(b),
+    );
+    const ok = slots.every((id, i) => id === subsetCorrect[i]);
     if (ok) {
       setSolved(true);
       setErrMsg("");
