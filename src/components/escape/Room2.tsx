@@ -338,7 +338,8 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
       {solved && (
         <button
           onClick={onComplete}
-          className="mx-auto rounded-full bg-primary px-8 py-3 text-sm font-medium text-primary-foreground shadow-lg transition hover:opacity-90"
+          className="absolute left-1/2 top-6 z-30 -translate-x-1/2 rounded-full bg-primary px-8 py-3 text-sm font-medium text-primary-foreground shadow-lg transition hover:opacity-90"
+
         >
           {nextCta} →
         </button>
