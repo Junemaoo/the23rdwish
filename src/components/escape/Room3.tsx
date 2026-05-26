@@ -14,7 +14,7 @@ const HOTSPOTS: Record<string, { x: number; y: number; w: number }> = {
   map: { x: 73, y: 78, w: 14 },
 };
 
-const BOTTLE_POS = { x: 74, y: 22, w: 7 };
+const BOTTLE_POS = { x: 65, y: 18, w: 8 };
 const DOOR_BTN_POS = { x: 40, y: 19 };
 
 export function Room3({ onComplete }: { onComplete: () => void }) {
@@ -96,7 +96,7 @@ export function Room3({ onComplete }: { onComplete: () => void }) {
             width: `${BOTTLE_POS.w}%`,
             aspectRatio: "1 / 1.6",
           }}
-          className="absolute z-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer"
+          className="absolute z-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full ring-1 ring-amber-300/40 hover:ring-amber-300/80"
           title={allCollected ? "许愿瓶被点亮了" : `还差 ${fragmentOrder.length - collected.length} 片`}
           aria-label="许愿瓶"
         >
