@@ -15,6 +15,7 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
     ROOM_2_DATA;
 
   const [openExhibit, setOpenExhibit] = useState<Exhibit | null>(null);
+  const [sortOpen, setSortOpen] = useState(false);
   const [solved, setSolved] = useState(false);
   const [errMsg, setErrMsg] = useState("");
   const [wrong, setWrong] = useState(0);
@@ -87,6 +88,7 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
     if (ok) {
       setSolved(true);
       setErrMsg("");
+      setSortOpen(false);
     } else {
       const next = wrong + 1;
       setWrong(next);
@@ -157,6 +159,46 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
           }}
         />
 
+        {/* 布告板 — 点击弹出排序面板 */}
+        <button
+          onClick={() => setSortOpen(true)}
+          aria-label="展品排序布告板"
+          title="展品排序"
+          className="group absolute focus:outline-none"
+          style={{
+            left: "60%",
+            top: "20%",
+            width: "8%",
+            height: "14%",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          <svg viewBox="0 0 100 110" className="h-full w-full drop-shadow-[0_4px_6px_rgba(0,0,0,0.4)] transition group-hover:scale-105">
+            {/* 绳子 */}
+            <line x1="50" y1="8" x2="20" y2="40" stroke="#3b2a20" strokeWidth="1.2" />
+            <line x1="50" y1="8" x2="80" y2="40" stroke="#3b2a20" strokeWidth="1.2" />
+            {/* 红色钉 */}
+            <circle cx="50" cy="8" r="6" fill="#b8453a" stroke="#7a2a22" strokeWidth="0.8" />
+            {/* 木板 */}
+            <rect x="18" y="38" width="64" height="58" rx="2" fill="#6e4a32" stroke="#3b2a20" strokeWidth="0.8" />
+            {/* 4 条纸 */}
+            {[0, 1, 2, 3].map((i) => (
+              <rect
+                key={i}
+                x={24 + i * 14}
+                y={52}
+                width={10}
+                height={32}
+                fill="#fbf3e6"
+                className="transition group-hover:fill-[#fffbe8]"
+              />
+            ))}
+          </svg>
+          <span className="pointer-events-none absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black/70 px-1.5 py-0.5 text-[10px] text-amber-100 opacity-0 transition group-hover:opacity-100">
+            展品排序
+          </span>
+        </button>
+
         {/* 10 个展柜热区 */}
         {exhibits.map((ex, i) => {
           const p = hotspots[i];
@@ -186,7 +228,7 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
         {/* 门锁提示 */}
         {doorHint && (
           <div className="pointer-events-none absolute left-1/2 top-[34%] -translate-x-1/2 rounded-full bg-black/70 px-4 py-1.5 text-xs text-amber-100">
-            🔒 门锁着 · 先完成展品时间排序
+            🔒 门锁着 · 先点击门旁的布告板完成展品排序
           </div>
         )}
 
@@ -243,8 +285,10 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
         )}
       </div>
 
-      {/* 排序区 — 浮在底部 */}
-      <section className="absolute bottom-3 left-1/2 z-20 w-[min(960px,96vw)] -translate-x-1/2 rounded-2xl border border-border bg-card/85 p-4 shadow-2xl backdrop-blur">
+      {/* 排序面板 — 由布告板触发的弹窗 */}
+      <Modal open={sortOpen} onClose={() => setSortOpen(false)} title="🗂️ 展品时间排序">
+        <div>
+
 
         <p className="mb-1 text-sm font-medium text-card-foreground">{puzzlePrompt}</p>
         <p className="mb-4 text-xs text-muted-foreground">
@@ -318,7 +362,8 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
             重置
           </button>
         </div>
-      </section>
+        </div>
+      </Modal>
 
       <Modal
         open={!!openExhibit}
