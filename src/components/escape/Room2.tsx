@@ -349,23 +349,30 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
         </div>
       </Modal>
 
-      <Modal
-        open={!!openExhibit}
-        onClose={() => setOpenExhibit(null)}
-        title={openExhibit ? `展品 ${openExhibit.no} · ${openExhibit.name}` : ""}
-      >
-        <div className="space-y-3">
-          {openExhibit && (
+      {openExhibit && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 animate-in fade-in"
+          onClick={() => setOpenExhibit(null)}
+        >
+          <div
+            className="relative w-[90vw] max-w-lg rounded-3xl bg-[#fbe9e0] p-8 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-center text-2xl font-bold text-[#2b2b2b]">
+              展品{openExhibit.no}
+            </h3>
+            <p className="mt-6 text-base leading-relaxed text-[#3a3a3a]">
+              {openExhibit.desc}
+            </p>
             <img
               src={openExhibit.image}
               alt={openExhibit.name}
-              className="mx-auto h-56 w-auto rounded-lg object-contain"
+              className="mx-auto mt-6 max-h-60 w-auto object-contain"
             />
-          )}
-          <p>{openExhibit?.desc}</p>
+          </div>
         </div>
+      )}
 
-      </Modal>
 
       <Modal open={solved} onClose={onComplete} title="🗂️ 档案归档完成">
         {successText}
