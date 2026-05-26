@@ -1,43 +1,30 @@
-# 开门动画 & 进入下一关按钮
-
 ## 目标
-密码输入正确后：
-1. 不再弹出"🔓 门开了"的 Modal（删除）
-2. 在场景中门的位置上叠加一扇可"向外推开"的门，播放铰链旋转动画
-3. 动画结束后，在门洞内出现一颗"进入下一关 →"按钮
+把房间 2（礼物档案室）现有的"几何方块+俯视图"换成你上传的等距展厅渲染图作为底图，亮度调到与房间 1（木门密码锁那张）一致，再在图上对齐 10 个展柜热区做点击交互，下方时间排序面板保持不变。
 
-## 实现
+## 步骤
 
-### 1. `src/components/escape/Room1.tsx`
-- 删除 `<Modal open={solved} ...>` 整段（lines 275-285）。
-- 在 hotspots/密码锁之后，新增一段「门动画层」，仅当 `solved === true` 时渲染：
-  - 一个绝对定位的容器，对齐到木门位置：`left:60% top:25% width:14% height:55%`。
-  - 容器内部：
-    - 底层"门洞"：深色渐变 + 中心暖色光晕（`bg-gradient-radial from-amber-200/90 via-amber-500/40 to-black/80`），代表门后透出的光。
-    - 上层"门板"：使用一张木门贴图（或纯 CSS 木纹渐变 + 高光 + 门把手小圆点）。
-      - `transform-origin: left center`（沿左侧铰链向外推）
-      - 初始 `rotateY(0deg)`，加上 `transition: transform 1.2s cubic-bezier(.22,.61,.36,1)`；solved 后用 `useEffect` 在下一帧设置 `rotateY(-75deg)` 触发动画。
-      - 配合轻微 `perspective: 1200px`（加在父容器）让旋转有立体感。
-    - 一段开门音效感的光晕脉冲（可选：`animate-pulse` 在光晕层）。
-  - 进入按钮：`solved && doorOpened` 时才渲染（用 `setTimeout(1200)` 或 `onTransitionEnd` 切 `doorOpened=true`），定位在门洞中央：
-    ```
-    absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
-    rounded-full bg-primary px-6 py-2 text-sm text-primary-foreground
-    shadow-[0_0_30px_rgba(255,200,120,.7)] animate-in fade-in zoom-in
-    ```
-    文案使用 `config.nextCta`（"进入下一关"），点击调用 `onComplete`。
-- 新增 state：`const [doorOpened, setDoorOpened] = useState(false)`，并在 `solved` 变 true 时启动定时器；卸载时清除。
+1. **导入素材**
+   - 把 `user-uploads://room2_draft.png` 复制到 `src/assets/room2-hall.png`
+   - 在 `Room2.tsx` 里 `import room2Bg from "@/assets/room2-hall.png"`
 
-### 2. 视觉细节
-- 门板用 CSS 实现，避免新增素材：
-  - 背景：`linear-gradient(180deg,#6b4423,#4a2d18)` + 木纹叠层（重复线性渐变）
-  - 边框：`border border-amber-950/60 ring-1 ring-black/40`
-  - 门把手：右侧居中一个 `w-1.5 h-1.5 rounded-full bg-yellow-300 shadow`
-- 容器加 `pointer-events-none`，让按钮独立处理 `pointer-events-auto`，避免门板挡住按钮点击。
+2. **替换房间底图**
+   - 删除现有的 `wood-floor`、地毯 div、`IsoDisplayCase` 渲染、`IsoDoor`、聚光圆
+   - 把外层容器换成 `aspectRatio: 4/3`（贴近原图比例），`background-image: url(room2Bg)`，`background-size: cover`
+   - 加一层与房间 1 一致的暖色调蒙版（参考 Room1 的 `bg-[oklch(...)]/xx` 叠加值），统一亮度
 
-### 3. 不动的部分
-- `config.successText`、`config.nextCta`、`onComplete` 流程保持。
-- 密码输入、关闭逻辑不变。
+3. **对齐 10 个透明热区**
+   - 保留 `exhibits` 数据，按图中 10 个展柜实际位置重写 `wallPositions`（左列 3 个、中列 2 个、右列 3 个、最前 2 个，按图核对）
+   - 每个热区改成透明按钮（`bg-transparent` + hover 时淡黄描边/光晕），尺寸约 `w-[12%] h-[18%]`，仍点击打开 `Modal` 显示展品信息
+   - 加调试开关（沿用 Room1 的 D 键网格+鼠标坐标），方便你微调坐标到完全贴合展柜
 
-## 备注
-门的定位 `left:60% top:25% w:14% h:55%` 是按当前背景图的估算值，实装后如果发现偏移可再微调（这是纯 CSS 数值，不需重新生成图）。
+4. **门的处理**
+   - 图中正后方已有木门：在门位置加一个透明热区，`solved` 后点击触发 `onComplete`，否则提示"先完成排序"
+   - 移除原先右侧浮动的 `IsoDoor` 元素
+
+5. **保留原有逻辑**
+   - 下方时间排序卡槽、拖拽、确认/重置、错误提示、`Modal`、`successText` 完全不动
+   - `solved` 后的"进入下一关"按钮保留
+
+## 需要你确认
+- 蒙版亮度以 Room1 当前画面为基准对齐，可在调试时再微调，OK 吗？
+- 10 个展柜中下排"T 恤模特"位置在图中央偏前，它对应 `exhibits[7]`（下墙左）还是中央独立位？我倾向把它当作中央位（坐标 ~50%/62%），其它 9 个绕墙分布。
