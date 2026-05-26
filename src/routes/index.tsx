@@ -113,13 +113,13 @@ function Opening({ onStart }: { onStart: () => void }) {
       <div className="relative z-10 mb-6 text-6xl drop-shadow-[0_0_24px_rgba(245,196,94,.7)]">
         ​
       </div>
-      <h1 className="relative z-10 font-serif text-4xl text-[oklch(0.96_0.045_92)] sm:text-5xl">
+      <h1 className="relative z-10 text-4xl text-[oklch(0.96_0.045_92)] shadow-sm rounded-none font-serif sm:text-7xl">
         {OPENING.title}
       </h1>
       <p className="relative z-10 mt-3 text-lg text-[oklch(0.80_0.135_80)]">
         {OPENING.subtitle}
       </p>
-      <div className="relative z-10 mt-8 max-w-md space-y-2 text-sm leading-relaxed text-slate-300">
+      <div className="relative z-10 mt-8 max-w-md space-y-6 text-sm leading-relaxed text-slate-300">
         {OPENING.intro.map((line, i) => (
           <p key={i}>{line}</p>
         ))}
