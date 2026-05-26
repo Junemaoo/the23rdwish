@@ -112,22 +112,10 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 z-0 h-screen w-screen overflow-hidden bg-black">
-      <header className="pointer-events-none absolute left-4 top-4 z-30 rounded-lg bg-black/50 px-3 py-2 text-left backdrop-blur">
-        <p className="text-[10px] tracking-[0.3em] text-amber-100/80">
-          房间 {meta.index} / {meta.total}
-        </p>
-        <h2 className="font-serif text-lg text-amber-50 sm:text-xl">
-          《{meta.name}》
-        </h2>
-        <p className="text-[11px] text-amber-100/70">{meta.subtitle}</p>
-      </header>
-
-      {/* 展览馆 — 等距渲染底图 + 透明热区，铺满视口 */}
+    <div className="fixed inset-0 z-0 flex h-screen w-screen items-center justify-center overflow-hidden bg-[#d4c4a0]">
+      {/* 展览馆 — 内层固定宽高比，所有热区坐标基于底图 */}
       <div
-        className="absolute inset-0"
-
-
+        className="relative aspect-[1456/1080] h-full max-h-full w-auto max-w-full"
         onMouseMove={(e) => {
           if (!debug) return;
           const r = e.currentTarget.getBoundingClientRect();
@@ -143,6 +131,7 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
           draggable={false}
           className="absolute inset-0 h-full w-full select-none object-contain"
         />
+
 
         {/* 后门热区 */}
         <button
