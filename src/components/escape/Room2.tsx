@@ -88,6 +88,7 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
     if (ok) {
       setSolved(true);
       setErrMsg("");
+      setSortOpen(false);
     } else {
       const next = wrong + 1;
       setWrong(next);
