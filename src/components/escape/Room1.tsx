@@ -272,17 +272,62 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
       )}
 
 
-      <Modal open={solved} onClose={onComplete} title="🔓 门开了">
-        <div className="space-y-4">
-          <p className="whitespace-pre-line">{config.successText}</p>
-          <button
-            onClick={onComplete}
-            className="w-full rounded-full bg-primary px-8 py-3 text-sm font-medium text-primary-foreground shadow-lg transition hover:opacity-90"
+      {/* 开门动画 */}
+      {solved && (
+        <div
+          className="absolute z-30"
+          style={{
+            left: "60%",
+            top: "25%",
+            width: "14%",
+            height: "55%",
+            perspective: "1200px",
+          }}
+        >
+          {/* 门洞光晕 */}
+          <div
+            className="absolute inset-0 overflow-hidden rounded-sm"
+            style={{
+              background:
+                "radial-gradient(ellipse at center, rgba(255,224,160,0.95) 0%, rgba(255,170,80,0.55) 35%, rgba(20,10,0,0.85) 80%)",
+            }}
           >
-            {config.nextCta} →
-          </button>
+            <div
+              className="absolute inset-0 animate-pulse"
+              style={{
+                background:
+                  "radial-gradient(ellipse at center, rgba(255,240,200,0.4), transparent 60%)",
+              }}
+            />
+          </div>
+
+          {/* 门板 */}
+          <div
+            className="absolute inset-0 rounded-sm border border-amber-950/70 shadow-2xl"
+            style={{
+              transformOrigin: "left center",
+              transform: doorOpened ? "rotateY(-78deg)" : "rotateY(0deg)",
+              transition: "transform 1.2s cubic-bezier(.22,.61,.36,1)",
+              background:
+                "repeating-linear-gradient(180deg, #6b4423 0px, #5a3819 8px, #6b4423 16px), linear-gradient(180deg,#7a4d28,#3e2410)",
+              backgroundBlendMode: "multiply",
+              boxShadow: "inset 0 0 12px rgba(0,0,0,0.5)",
+            }}
+          >
+            <div className="absolute right-[10%] top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-yellow-300 shadow-[0_0_4px_rgba(255,220,120,.9)]" />
+          </div>
+
+          {/* 进入下一关按钮 */}
+          {doorOpened && (
+            <button
+              onClick={onComplete}
+              className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-primary px-4 py-2 text-xs font-medium text-primary-foreground shadow-[0_0_30px_rgba(255,200,120,.8)] animate-in fade-in zoom-in duration-500 hover:opacity-90"
+            >
+              {config.nextCta} →
+            </button>
+          )}
         </div>
-      </Modal>
+      )}
     </div>
   );
 }
