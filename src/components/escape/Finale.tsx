@@ -131,11 +131,11 @@ export function Finale({ onRestart }: { onRestart: () => void }) {
                 : "opacity-100 animate-in fade-in slide-in-from-bottom-4 duration-700"
             }`}
           >
-            <div className="relative mx-auto max-w-md">
+            <div className="relative mx-auto w-full max-w-[min(95vw,1100px)]">
               <img
                 src={letterImg}
                 alt="生日信"
-                className="mx-auto w-full rounded-[18px] shadow-[0_24px_60px_-20px_rgba(120,80,50,0.55)]"
+                className="mx-auto w-full rounded-[18px] shadow-[0_30px_80px_-20px_rgba(120,80,50,0.55)]"
               />
             </div>
 
@@ -168,7 +168,7 @@ export function Finale({ onRestart }: { onRestart: () => void }) {
               <img
                 src={cakeImg}
                 alt="生日蛋糕"
-                className="relative w-72 drop-shadow-[0_20px_30px_rgba(180,140,90,0.35)] md:w-80"
+                className="relative w-full max-w-[min(95vw,1100px)] drop-shadow-[0_30px_50px_rgba(180,140,90,0.35)]"
               />
             </div>
             <p className="text-sm text-[#8A6A5C]">请打开冰箱完成许愿吧！</p>
