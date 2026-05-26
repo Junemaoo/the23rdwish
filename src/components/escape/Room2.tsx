@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { ROOM_2_DATA, type Exhibit } from "./config";
 import { Modal } from "./ui";
 import room2Bg from "@/assets/room2-hall.png";
@@ -349,29 +350,32 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
         </div>
       </Modal>
 
-      {openExhibit && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 animate-in fade-in"
-          onClick={() => setOpenExhibit(null)}
-        >
+      {openExhibit &&
+        createPortal(
           <div
-            className="relative w-[90vw] max-w-lg rounded-3xl bg-[#fbe9e0] p-8 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/50 px-4 py-8 animate-in fade-in"
+            onClick={() => setOpenExhibit(null)}
           >
-            <h3 className="text-center text-2xl font-bold text-[#2b2b2b]">
-              展品{openExhibit.no}
-            </h3>
-            <p className="mt-6 text-base leading-relaxed text-[#3a3a3a]">
-              {openExhibit.desc}
-            </p>
-            <img
-              src={openExhibit.image}
-              alt={openExhibit.name}
-              className="mx-auto mt-6 max-h-60 w-auto object-contain"
-            />
-          </div>
-        </div>
-      )}
+            <div
+              className="relative my-auto w-[90vw] max-w-lg rounded-3xl bg-[#fbe9e0] p-8 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-center text-2xl font-bold text-[#2b2b2b]">
+                展品{openExhibit.no}
+              </h3>
+              <p className="mt-6 text-base leading-relaxed text-[#3a3a3a]">
+                {openExhibit.desc}
+              </p>
+              <img
+                src={openExhibit.image}
+                alt={openExhibit.name}
+                className="mx-auto mt-6 max-h-60 w-auto object-contain"
+              />
+            </div>
+          </div>,
+          document.body,
+        )}
+
 
 
       <Modal open={solved} onClose={onComplete} title="🗂️ 档案归档完成">
