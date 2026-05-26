@@ -256,18 +256,20 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
         </div>
       )}
 
-      <Modal open={showAnswer && !solved} onClose={() => setShowAnswer(false)} title="🔒 数字密码锁">
-        <AnswerInput
+      {showAnswer && !solved && (
+        <PasscodePad
           prompt={config.puzzlePrompt}
           hint={config.puzzleHint}
           answer={config.answer}
           errorMessages={config.errorMessages}
+          onClose={() => setShowAnswer(false)}
           onSolved={() => {
             setSolved(true);
             setShowAnswer(false);
           }}
         />
-      </Modal>
+      )}
+
 
       <Modal open={solved} onClose={onComplete} title="🔓 门开了">
         <div className="space-y-4">
