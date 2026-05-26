@@ -162,7 +162,7 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
           title="展品排序"
           className="group absolute focus:outline-none"
           style={{
-            left: "56.5%",
+            left: "54%",
             top: "13.5%",
             width: "10%",
             height: "9%",
