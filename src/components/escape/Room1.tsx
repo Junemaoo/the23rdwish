@@ -138,10 +138,11 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
       <button
         onClick={() => setShowAnswer(true)}
         className="absolute cursor-pointer bg-transparent"
-        style={{ left: "50%", top: "48%", width: "6%", height: "14%" }}
+        style={{ left: "56.5%", top: "27%", width: "4%", height: "9%" }}
         title="数字密码锁"
         aria-label="数字密码锁"
       />
+
 
       {/* 线索卡片 */}
       {openClue && (
