@@ -14,7 +14,7 @@ const HOTSPOTS: Record<string, { x: number; y: number; w: number }> = {
   map: { x: 73, y: 78, w: 14 },
 };
 
-const BOTTLE_POS = { x: 74, y: 22, w: 7 };
+const BOTTLE_POS = { x: 65, y: 18, w: 8 };
 const DOOR_BTN_POS = { x: 40, y: 19 };
 
 export function Room3({ onComplete }: { onComplete: () => void }) {
