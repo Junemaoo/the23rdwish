@@ -409,7 +409,6 @@ function PasscodePad({
           <h3 className="text-center text-lg font-semibold tracking-wide text-white/90">
             请输入本关密码
           </h3>
-          <p className="-mt-2 text-center text-[11px] text-white/50">{prompt}</p>
 
           {/* 电子屏 */}
           <div
