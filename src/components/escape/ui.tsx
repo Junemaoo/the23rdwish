@@ -7,11 +7,13 @@ export function Modal({
   onClose,
   title,
   children,
+  hideClose,
 }: {
   open: boolean;
   onClose: () => void;
   title?: string;
   children: React.ReactNode;
+  hideClose?: boolean;
 }) {
   if (!open) return null;
   if (typeof document === "undefined") return null;
@@ -24,6 +26,15 @@ export function Modal({
         className="relative my-auto w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
+        {hideClose && (
+          <button
+            onClick={onClose}
+            aria-label="关闭"
+            className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
+          >
+            ✕
+          </button>
+        )}
         {title && (
           <h3 className="mb-3 text-lg font-semibold text-card-foreground">
             {title}
@@ -32,12 +43,14 @@ export function Modal({
         <div className="whitespace-pre-line text-sm leading-relaxed text-card-foreground">
           {children}
         </div>
-        <button
-          onClick={onClose}
-          className="mt-5 w-full rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90"
-        >
-          知道了
-        </button>
+        {!hideClose && (
+          <button
+            onClick={onClose}
+            className="mt-5 w-full rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90"
+          >
+            知道了
+          </button>
+        )}
       </div>
     </div>,
     document.body,
