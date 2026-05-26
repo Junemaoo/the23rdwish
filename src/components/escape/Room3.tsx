@@ -99,7 +99,7 @@ export function Room3({ onComplete }: { onComplete: () => void }) {
             width: `${BOTTLE_POS.w}%`,
             aspectRatio: "1 / 1.6",
           }}
-          className="absolute z-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer"
+          className="absolute z-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer border-2 border-dashed border-amber-300 bg-amber-300/15"
           title={allCollected ? "许愿瓶被点亮了" : `还差 ${fragmentOrder.length - collected.length} 片`}
           aria-label="许愿瓶"
         >
