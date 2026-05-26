@@ -18,6 +18,7 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
   const [openExhibit, setOpenExhibit] = useState<Exhibit | null>(null);
   const [sortOpen, setSortOpen] = useState(false);
   const [solved, setSolved] = useState(false);
+  const [archiveAck, setArchiveAck] = useState(false);
   const [errMsg, setErrMsg] = useState("");
   const [wrong, setWrong] = useState(0);
   
@@ -391,7 +392,7 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
 
 
 
-      <Modal open={solved} onClose={onComplete} title="🗂️ 档案归档完成">
+      <Modal open={solved && !archiveAck} onClose={() => setArchiveAck(true)} title="🗂️ 档案归档完成">
         {successText}
       </Modal>
 
