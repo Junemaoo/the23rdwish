@@ -135,6 +135,28 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
         />
 
 
+        {/* 10 个展品热区 */}
+        {hotspots.map((p, i) => {
+          const ex = exhibits[i];
+          if (!ex) return null;
+          return (
+            <button
+              key={ex.id}
+              onClick={() => setOpenExhibit(ex)}
+              aria-label={ex.name}
+              title={ex.name}
+              className="absolute cursor-pointer bg-transparent focus:outline-none"
+              style={{
+                left: `${p.x}%`,
+                top: `${p.y}%`,
+                width: `${p.w}%`,
+                height: `${p.h}%`,
+                transform: "translate(-50%, -50%)",
+              }}
+            />
+          );
+        })}
+
         {/* 后门热区 */}
         <button
           onClick={handleDoor}
@@ -149,6 +171,7 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
             transform: "translate(-50%, -50%)",
           }}
         />
+
 
         {/* 布告板 — 覆盖墙上原告示牌，点击弹出排序面板 */}
         <button
