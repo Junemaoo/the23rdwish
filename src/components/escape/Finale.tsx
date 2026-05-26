@@ -1,119 +1,207 @@
 import { useState } from "react";
 import { FINALE } from "./config";
-import { Modal } from "./ui";
-import { IsoGiftBox, IsoCake } from "./iso";
+import letterBg from "@/assets/finale/letter-bg.png";
+import cakeImg from "@/assets/finale/cake.png";
+
+type Stage = "initial" | "gift1" | "gift2Box" | "cake";
+
+function YellowButton({
+  children,
+  onClick,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="group relative rounded-full bg-gradient-to-b from-[#FFD86B] to-[#F4B740] px-8 py-3.5 text-base font-semibold text-[#5A3A12] shadow-[0_8px_24px_-8px_rgba(244,183,64,0.7)] transition-all duration-200 hover:scale-[1.04] hover:shadow-[0_12px_32px_-8px_rgba(244,183,64,0.85)] active:scale-95"
+    >
+      <span className="relative z-10">{children}</span>
+      <span className="pointer-events-none absolute inset-0 rounded-full bg-white/40 opacity-0 transition-opacity group-hover:opacity-30" />
+    </button>
+  );
+}
+
+function Sparkles() {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      {Array.from({ length: 12 }).map((_, i) => (
+        <span
+          key={i}
+          className="absolute animate-pulse text-yellow-300"
+          style={{
+            left: `${(i * 37) % 100}%`,
+            top: `${(i * 53) % 100}%`,
+            fontSize: `${10 + (i % 4) * 4}px`,
+            animationDelay: `${(i % 6) * 0.2}s`,
+            animationDuration: `${1.5 + (i % 3) * 0.4}s`,
+          }}
+        >
+          ✦
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function GiftBox({ opened, onClick }: { opened: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={opened}
+      aria-label="礼物盒"
+      className={`relative h-56 w-56 transition-transform ${
+        opened ? "" : "animate-[wiggle_2s_ease-in-out_infinite] hover:scale-105"
+      }`}
+      style={{
+        // @ts-expect-error custom keyframes via inline style
+        "--tw-wiggle": "1",
+      }}
+    >
+      {/* 盒身 */}
+      <div className="absolute inset-x-4 bottom-2 top-16 rounded-xl bg-gradient-to-b from-[#F8B4C8] to-[#E48AA8] shadow-lg" />
+      {/* 竖丝带 */}
+      <div className="absolute bottom-2 top-16 left-1/2 w-6 -translate-x-1/2 bg-[#FFE36A]" />
+      {/* 盒盖 */}
+      <div
+        className={`absolute inset-x-1 top-12 h-12 rounded-lg bg-gradient-to-b from-[#FF9CBA] to-[#E37BA0] shadow-md transition-all duration-500 ${
+          opened ? "-translate-y-10 -rotate-12 opacity-0" : ""
+        }`}
+      />
+      {/* 横丝带 */}
+      <div
+        className={`absolute left-1 right-1 top-[3.75rem] h-3 bg-[#FFE36A] transition-all duration-500 ${
+          opened ? "-translate-y-10 opacity-0" : ""
+        }`}
+      />
+      {/* 蝴蝶结 */}
+      <div
+        className={`absolute left-1/2 top-6 -translate-x-1/2 transition-all duration-500 ${
+          opened ? "-translate-y-14 scale-150 opacity-0" : ""
+        }`}
+      >
+        <div className="relative h-12 w-20">
+          <div className="absolute left-0 top-1 h-10 w-8 -rotate-12 rounded-full bg-[#FFD43B] shadow-md" />
+          <div className="absolute right-0 top-1 h-10 w-8 rotate-12 rounded-full bg-[#FFD43B] shadow-md" />
+          <div className="absolute left-1/2 top-3 h-6 w-6 -translate-x-1/2 rounded-full bg-[#F4B740] shadow" />
+        </div>
+      </div>
+      <style>{`
+        @keyframes wiggle {
+          0%, 100% { transform: rotate(-3deg); }
+          50% { transform: rotate(3deg); }
+        }
+      `}</style>
+    </button>
+  );
+}
 
 export function Finale({ onRestart }: { onRestart: () => void }) {
-  const [giftOpen, setGiftOpen] = useState(false);
-  const [giftModal, setGiftModal] = useState(false);
-  const [candlesLit, setCandlesLit] = useState(true);
-  const [wish, setWish] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [stage, setStage] = useState<Stage>("initial");
+  const [boxOpened, setBoxOpened] = useState(false);
 
   return (
     <div
-      className="min-h-screen px-4 py-10"
+      className="relative min-h-screen overflow-hidden px-4 py-12"
       style={{
         background:
-          "radial-gradient(ellipse at 50% 0%, oklch(0.91 0.055 5) 0%, oklch(0.96 0.045 92) 60%)",
+          "radial-gradient(ellipse at 50% 0%, #FFE8EE 0%, #FFF4E0 45%, #FFF8EC 100%)",
       }}
     >
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-10">
-        {/* 信纸 */}
-        <article
-          className="rounded-2xl border border-[#F5C45E]/60 p-8 shadow-xl"
-          style={{
-            background:
-              "repeating-linear-gradient(transparent 0 31px, oklch(0.85 0.05 80 / 0.45) 31px 32px), #FFF8EC",
-          }}
-        >
-          <h2 className="mb-4 font-serif text-2xl text-[#3E2F2A]">
-            {FINALE.letterTitle}
-          </h2>
-          <div className="whitespace-pre-line font-serif text-base leading-8 text-[#3E2F2A]/90">
-            {FINALE.letter.join("\n")}
-          </div>
-        </article>
-
-        {/* 礼物盒 */}
-        <section className="flex flex-col items-center gap-3">
-          <p className="text-sm text-[#3E2F2A]/70">{FINALE.giftHint}</p>
-          <button
-            onClick={() => {
-              setGiftOpen(true);
-              setTimeout(() => setGiftModal(true), 450);
-            }}
-            className="w-48 transition hover:scale-105"
-            aria-label="打开礼物盒"
-          >
-            <IsoGiftBox open={giftOpen} />
-          </button>
-        </section>
-
-        {/* 蛋糕 */}
-        <section className="flex flex-col items-center gap-3">
-          <p className="text-sm text-[#3E2F2A]/70">{FINALE.cakeHint}</p>
-          <button
-            onClick={() => setCandlesLit(false)}
-            className="w-64 transition hover:scale-105"
-            aria-label="吹蜡烛"
-          >
-            <IsoCake lit={candlesLit} />
-          </button>
-          {candlesLit ? (
-            <p className="text-xs text-[#B9825A]">（蜡烛在跳……点一下吹灭）</p>
-          ) : (
-            <p className="text-xs font-semibold text-[#5D8A66]">
-              呼——蜡烛灭了。烟还在飘。 🎉 Happy Birthday!
-            </p>
-          )}
-        </section>
-
-        {/* 许愿 */}
-        <section className="rounded-2xl border border-[#F5C45E]/40 bg-white/70 p-6 backdrop-blur">
-          <p className="mb-3 text-sm font-medium text-[#3E2F2A]">
-            {FINALE.wishPrompt}
+      <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-8 text-center">
+        {/* 标题 */}
+        <header className="flex flex-col items-center gap-3">
+          <h1 className="font-serif text-4xl font-bold text-[#C25B7C] drop-shadow-sm md:text-5xl">
+            🎉 恭喜你！成功通关！
+          </h1>
+          <p className="max-w-xl text-base text-[#8A6A5C]">
+            噜噜啦啦，下面是为你准备的两份精美礼品喔，请拆开吧！
           </p>
-          {submitted ? (
-            <p className="whitespace-pre-line text-sm leading-relaxed text-[#B9825A]">
-              {FINALE.finalText}
-            </p>
-          ) : (
-            <>
-              <textarea
-                value={wish}
-                onChange={(e) => setWish(e.target.value)}
-                placeholder={FINALE.wishPlaceholder}
-                rows={4}
-                className="w-full resize-none rounded-lg border border-[#F5C45E]/50 bg-white p-3 text-sm outline-none focus:border-[#B9825A]"
-              />
-              <button
-                onClick={() => wish.trim() && setSubmitted(true)}
-                className="mt-3 w-full rounded-full bg-[#3E2F2A] px-4 py-3 text-sm font-medium text-[#FFDFA3] transition hover:opacity-90"
-              >
-                许下第 23 个愿望 ✨
-              </button>
-            </>
-          )}
-        </section>
+        </header>
 
-        {submitted && (
-          <button
-            onClick={onRestart}
-            className="mx-auto text-xs text-[#3E2F2A]/60 underline hover:text-[#3E2F2A]"
-          >
-            再玩一遍
-          </button>
+        {/* Stage: initial — 解锁礼物1 */}
+        {stage === "initial" && (
+          <div className="animate-in fade-in zoom-in-95 duration-500">
+            <YellowButton onClick={() => setStage("gift1")}>
+              🎁 解锁礼物1
+            </YellowButton>
+          </div>
+        )}
+
+        {/* Stage: gift1 — 信纸 */}
+        {(stage === "gift1" || stage === "gift2Box" || stage === "cake") && (
+          <section className="relative w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="relative mx-auto max-w-md">
+              <Sparkles />
+              <div
+                className="relative mx-auto rounded-[18px] px-8 py-10 text-left shadow-[0_20px_50px_-20px_rgba(180,130,90,0.55)]"
+                style={{
+                  backgroundImage: `url(${letterBg})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundColor: "#F5EAD2",
+                  minHeight: "520px",
+                }}
+              >
+                <div className="absolute inset-0 rounded-[18px] bg-[#F8EFD8]/55" />
+                <div className="relative">
+                  <h2 className="mb-4 font-serif text-2xl font-bold text-[#3E2F2A]">
+                    {FINALE.letterTitle}
+                  </h2>
+                  <div className="whitespace-pre-line font-serif text-[15px] leading-[1.95] text-[#3E2F2A]/90">
+                    {FINALE.letter.join("\n")}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {stage === "gift1" && (
+              <div className="mt-8 animate-in fade-in duration-500">
+                <YellowButton onClick={() => setStage("gift2Box")}>
+                  🎀 解锁礼物2
+                </YellowButton>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Stage: gift2Box — 礼物盒 */}
+        {stage === "gift2Box" && (
+          <section className="relative flex flex-col items-center gap-4 animate-in fade-in zoom-in-95 duration-500">
+            <GiftBox
+              opened={boxOpened}
+              onClick={() => {
+                if (boxOpened) return;
+                setBoxOpened(true);
+                setTimeout(() => setStage("cake"), 700);
+              }}
+            />
+            <p className="text-sm text-[#B9825A]">点击拆开礼物盒</p>
+          </section>
+        )}
+
+        {/* Stage: cake — 生日蛋糕 */}
+        {stage === "cake" && (
+          <section className="relative flex flex-col items-center gap-4 animate-in fade-in slide-in-from-bottom-6 duration-700">
+            <div className="relative">
+              <Sparkles />
+              <img
+                src={cakeImg}
+                alt="生日蛋糕"
+                className="relative w-72 drop-shadow-[0_20px_30px_rgba(180,140,90,0.35)] md:w-80"
+              />
+            </div>
+            <p className="text-sm text-[#8A6A5C]">请打开冰箱完成许愿吧！</p>
+            <button
+              onClick={onRestart}
+              className="mt-4 text-xs text-[#B9825A]/70 underline hover:text-[#B9825A]"
+            >
+              再玩一遍
+            </button>
+          </section>
         )}
       </div>
-
-      <Modal
-        open={giftModal}
-        onClose={() => setGiftModal(false)}
-        title="🎁 打开礼物盒"
-      >
-        {FINALE.giftReveal}
-      </Modal>
     </div>
   );
 }
