@@ -140,7 +140,7 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
           onClick={handleDoor}
           aria-label={solved ? "进入下一关" : "门已锁"}
           title={solved ? "进入下一关" : "先完成展品排序"}
-          className="absolute cursor-pointer bg-transparent transition hover:bg-amber-200/15 focus:outline-none"
+          className="absolute cursor-pointer bg-transparent focus:outline-none"
           style={{
             left: `${doorSpot.x}%`,
             top: `${doorSpot.y}%`,
