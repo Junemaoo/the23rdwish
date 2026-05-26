@@ -362,7 +362,8 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
             重置
           </button>
         </div>
-      </section>
+        </div>
+      </Modal>
 
       <Modal
         open={!!openExhibit}
