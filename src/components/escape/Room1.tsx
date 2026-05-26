@@ -124,7 +124,7 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
         <button
           key={h.id}
           onClick={() => setOpenClue(h)}
-          className="absolute cursor-pointer bg-transparent"
+          className="absolute cursor-pointer bg-transparent focus:outline-none focus-visible:outline-none"
           style={{
             left: `${h.left}%`,
             top: `${h.top}%`,
@@ -138,7 +138,7 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
       {/* 密码锁 */}
       <button
         onClick={() => setShowAnswer(true)}
-        className="absolute cursor-pointer bg-transparent"
+        className="absolute cursor-pointer bg-transparent focus:outline-none focus-visible:outline-none"
         style={{ left: "56.5%", top: "27%", width: "4%", height: "9%" }}
         title="数字密码锁"
         aria-label="数字密码锁"
