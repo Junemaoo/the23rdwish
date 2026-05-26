@@ -35,6 +35,8 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
   const [showInventory, setShowInventory] = useState(false);
   const [flying, setFlying] = useState<FlyingClue | null>(null);
   const [popping, setPopping] = useState(false);
+  const [debug, setDebug] = useState(false);
+  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
 
   const inventoryBtnRef = useRef<HTMLButtonElement | null>(null);
   const clueImgRef = useRef<HTMLImageElement | null>(null);
@@ -47,6 +49,7 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      if (e.key === "d" || e.key === "D") setDebug((v) => !v);
       if (e.key !== "Escape") return;
       if (openClue) setOpenClue(null);
       else if (showInventory) setShowInventory(false);
@@ -98,13 +101,25 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
   }
 
   return (
-    <div className="relative w-full min-h-[100svh] overflow-hidden bg-black">
+    <div
+      className="relative w-full min-h-[100svh] overflow-hidden bg-black"
+      onMouseMove={(e) => {
+        if (!debug) return;
+        const r = e.currentTarget.getBoundingClientRect();
+        setCursor({
+          x: ((e.clientX - r.left) / r.width) * 100,
+          y: ((e.clientY - r.top) / r.height) * 100,
+        });
+      }}
+    >
       <img
         src={room1Bg}
         alt=""
         className="absolute inset-0 h-full w-full select-none object-cover"
         draggable={false}
       />
+
+
 
       {/* 左上角：线索收集册 */}
       <button
@@ -278,10 +293,51 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
         <button
           onClick={onComplete}
           className="absolute z-30 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-[0_0_30px_rgba(255,200,120,.85)] animate-in fade-in zoom-in duration-700 hover:opacity-90"
-          style={{ left: "60%", top: "30%" }}
+          style={{ left: "52%", top: "30%" }}
         >
-          {config.nextCta} →
+          进入下一关 →
         </button>
+      )}
+
+      {/* 调试网格 (按 D 切换) */}
+      {debug && (
+        <div className="pointer-events-none absolute inset-0 z-40">
+          {Array.from({ length: 19 }).map((_, i) => (
+            <div
+              key={`v${i}`}
+              className="absolute top-0 h-full border-l border-cyan-400/30"
+              style={{ left: `${(i + 1) * 5}%` }}
+            />
+          ))}
+          {Array.from({ length: 19 }).map((_, i) => (
+            <div
+              key={`h${i}`}
+              className="absolute left-0 w-full border-t border-cyan-400/30"
+              style={{ top: `${(i + 1) * 5}%` }}
+            />
+          ))}
+          {/* 密码锁标记 */}
+          <div
+            className="absolute border-2 border-pink-500"
+            style={{ left: "56.5%", top: "27%", width: "4%", height: "9%" }}
+          />
+          {/* 当前按钮位置十字 */}
+          <div
+            className="absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-yellow-400 ring-2 ring-black"
+            style={{ left: "52%", top: "30%" }}
+          />
+          {cursor && (
+            <div
+              className="absolute rounded bg-black/80 px-2 py-1 font-mono text-[11px] text-cyan-300"
+              style={{ left: `${cursor.x}%`, top: `${cursor.y}%`, transform: "translate(8px, 8px)" }}
+            >
+              {cursor.x.toFixed(1)}% , {cursor.y.toFixed(1)}%
+            </div>
+          )}
+          <div className="absolute right-2 top-2 rounded bg-black/80 px-2 py-1 font-mono text-[11px] text-cyan-300">
+            DEBUG · 按 D 关闭 · 按钮 52% / 30%
+          </div>
+        </div>
       )}
     </div>
   );
