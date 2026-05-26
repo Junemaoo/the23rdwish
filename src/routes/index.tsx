@@ -59,7 +59,7 @@ function Index() {
       {stage !== "intro" && (
         <div className="sticky top-0 z-30 flex items-center justify-between border-b border-border/50 bg-background/85 px-4 py-3 backdrop-blur">
           <span className="font-serif text-sm text-foreground">
-            小毛子 · 第 23 次许愿
+            第 23 次许愿\n
           </span>
           <ProgressDots step={roomNum} total={4} />
         </div>
