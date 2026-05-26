@@ -278,7 +278,7 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
         <button
           onClick={onComplete}
           className="absolute left-1/2 top-1/2 z-30 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-[0_0_30px_rgba(255,200,120,.85)] animate-in fade-in zoom-in duration-700 hover:opacity-90"
-          style={{ left: "49%", top: "55%" }}
+          style={{ left: "48%", top: "38%" }}
         >
           {config.nextCta} →
         </button>
