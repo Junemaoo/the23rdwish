@@ -103,12 +103,7 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
   }
 
   function handleDoor() {
-    if (solved) {
-      onComplete();
-    } else {
-      setDoorHint(true);
-      window.setTimeout(() => setDoorHint(false), 1800);
-    }
+    if (solved) onComplete();
   }
 
   return (
