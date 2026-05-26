@@ -1,13 +1,28 @@
-## 改动 `src/components/escape/Room2.tsx`
+## 调整 Room2
 
-1. **去黑边 — 米色背景延伸全屏**
-   - 外层容器 `bg-black` → `bg-[#d4c4a0]`，保留 `object-contain`
+文件：`src/components/escape/Room2.tsx`
 
-2. **删除左上角章节标题 `<header>` 整块**
+### 1. 布告板再左移半格（5% 网格的一半 = 2.5%）
+- `left: "56.5%"` → `left: "54%"`（top/width/height 不变）
 
-3. **布告板贴合墙上"GIFTS INSPIRED BY DISCOVERY"**
-   - 新增内层 `<div className="relative mx-auto h-full aspect-[1456/1080] max-h-full max-w-full">`，把底图 `<img>` 和所有热区（后门、布告板、调试层）放进去，使所有百分比坐标基于底图本身而非视口
-   - 布告板坐标改为 `left: 56.5%, top: 13.5%, width: 10%, height: 9%`
-   - 后门坐标保持 `{x:50, y:16, w:7, h:18}`
+### 2. 消除"分层颜色"出戏感
+现在外层是纯色 `bg-[#d4c4a0]`，与底图 `object-contain` 后留出的左右带颜色对不上，形成明显色块。
 
-4. 排序 Modal / D 键调试 / 进入下一关按钮全部保留
+方案：在外层容器里再放一张同一张 `room2Bg`，铺满 + 放大 + 模糊 + 暗化，作为背景填充；上面再叠原来的 contain 图层。这样两侧"留白"无缝融入展厅氛围，不再是异色色带。
+
+```tsx
+<div className="fixed inset-0 z-0 flex h-screen w-screen items-center justify-center overflow-hidden bg-[#2a2118]">
+  {/* 背景模糊填充层 */}
+  <img
+    src={room2Bg}
+    aria-hidden
+    className="absolute inset-0 h-full w-full scale-110 object-cover blur-2xl opacity-60 select-none"
+  />
+  {/* 内层 contain 图层（原结构不变）*/}
+  <div className="relative aspect-[1456/1080] ...">
+    ...
+  </div>
+</div>
+```
+
+不改任何热区坐标、排序逻辑、modal。仅这两处视觉调整。

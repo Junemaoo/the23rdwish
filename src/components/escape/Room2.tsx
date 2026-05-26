@@ -112,7 +112,14 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 z-0 flex h-screen w-screen items-center justify-center overflow-hidden bg-[#d4c4a0]">
+    <div className="fixed inset-0 z-0 flex h-screen w-screen items-center justify-center overflow-hidden bg-[#2a2118]">
+      {/* 背景模糊填充层 — 消除两侧异色带 */}
+      <img
+        src={room2Bg}
+        aria-hidden
+        draggable={false}
+        className="pointer-events-none absolute inset-0 h-full w-full scale-110 select-none object-cover opacity-60 blur-2xl"
+      />
       {/* 展览馆 — 内层固定宽高比，所有热区坐标基于底图 */}
       <div
         className="relative aspect-[1456/1080] h-full max-h-full w-auto max-w-full"
