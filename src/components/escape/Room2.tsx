@@ -228,7 +228,7 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
         {/* 门锁提示 */}
         {doorHint && (
           <div className="pointer-events-none absolute left-1/2 top-[34%] -translate-x-1/2 rounded-full bg-black/70 px-4 py-1.5 text-xs text-amber-100">
-            🔒 门锁着 · 先完成展品时间排序
+            🔒 门锁着 · 先点击门旁的布告板完成展品排序
           </div>
         )}
 
