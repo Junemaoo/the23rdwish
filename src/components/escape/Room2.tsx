@@ -354,9 +354,16 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
         title={openExhibit ? `展品 ${openExhibit.no} · ${openExhibit.name}` : ""}
       >
         <div className="space-y-3">
-          <div className="text-5xl">{openExhibit?.icon}</div>
+          {openExhibit && (
+            <img
+              src={openExhibit.image}
+              alt={openExhibit.name}
+              className="mx-auto h-56 w-auto rounded-lg object-contain"
+            />
+          )}
           <p>{openExhibit?.desc}</p>
         </div>
+
       </Modal>
 
       <Modal open={solved} onClose={onComplete} title="🗂️ 档案归档完成">
