@@ -110,20 +110,21 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6">
-      <header className="text-center">
-        <p className="text-xs tracking-[0.3em] text-muted-foreground">
+    <div className="fixed inset-0 z-0 h-screen w-screen overflow-hidden bg-black">
+      <header className="pointer-events-none absolute left-4 top-4 z-30 rounded-lg bg-black/50 px-3 py-2 text-left backdrop-blur">
+        <p className="text-[10px] tracking-[0.3em] text-amber-100/80">
           房间 {meta.index} / {meta.total}
         </p>
-        <h2 className="mt-1 font-serif text-3xl text-foreground sm:text-4xl">
+        <h2 className="font-serif text-lg text-amber-50 sm:text-xl">
           《{meta.name}》
         </h2>
-        <p className="mt-1 text-sm text-muted-foreground">{meta.subtitle}</p>
+        <p className="text-[11px] text-amber-100/70">{meta.subtitle}</p>
       </header>
 
-      {/* 展览馆 — 等距渲染底图 + 透明热区 */}
+      {/* 展览馆 — 等距渲染底图 + 透明热区，铺满视口 */}
       <div
-        className="relative w-full overflow-hidden rounded-3xl border-2 border-[oklch(0.45_0.06_45)] shadow-2xl bg-black"
+        className="absolute inset-0"
+
         style={{ aspectRatio: "4 / 3" }}
         onMouseMove={(e) => {
           if (!debug) return;
