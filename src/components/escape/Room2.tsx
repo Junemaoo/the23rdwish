@@ -125,7 +125,7 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
       <div
         className="absolute inset-0"
 
-        style={{ aspectRatio: "4 / 3" }}
+
         onMouseMove={(e) => {
           if (!debug) return;
           const r = e.currentTarget.getBoundingClientRect();
