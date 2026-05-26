@@ -1,281 +1,149 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { ROOM_3_DATA, type Room3Item } from "./config";
 import { Modal } from "./ui";
-import { IsoTicket, IsoReceipt, IsoBowls, IsoCoffeeCups, IsoMap, IsoBottle, IsoDoor } from "./iso";
-
-const ITEM_SVG: Record<string, React.FC<{ className?: string }>> = {
-  ticket: IsoTicket,
-  popmart: IsoReceipt,
-  noodles: IsoBowls,
-  coffee: IsoCoffeeCups,
-  map: IsoMap,
-};
+import sceneImg from "@/assets/room3/scene.png";
 
 const norm = (s: string) => s.replace(/\s+/g, "").toLowerCase();
 
-/**
- * 房间 3：未来的一日行程单
- * - 桌面 5 个物件，乱序点击 → 弹窗答题 → 答对获得碎片
- * - 5 碎片收齐后，许愿瓶亮起；玩家需按"生→日→快→乐→呀"顺序拖入
- * - 顺序错：碎片回到原位 + 提示
- * - 全部就位 → 亮灯 + 星星 + 进入结算页按钮
- */
+/** 热点坐标（基于 scene.png 实际位置，可微调） */
+const HOTSPOTS: Record<string, { x: number; y: number; w: number }> = {
+  noodles: { x: 32, y: 62, w: 14 },
+  popmart: { x: 25, y: 78, w: 11 },
+  ticket: { x: 45, y: 75, w: 14 },
+  coffee: { x: 56, y: 67, w: 11 },
+  map: { x: 73, y: 78, w: 14 },
+};
+
+const BOTTLE_POS = { x: 74, y: 27, w: 6 };
+const DOOR_BTN_POS = { x: 40, y: 19 };
+
 export function Room3({ onComplete }: { onComplete: () => void }) {
   const { meta, items, fragmentOrder } = ROOM_3_DATA;
 
   const [openItem, setOpenItem] = useState<Room3Item | null>(null);
-  /** 已答对的物件 id */
   const [solvedItems, setSolvedItems] = useState<Set<string>>(new Set());
-  /** 已收集的碎片字（按获得顺序） */
   const [collected, setCollected] = useState<string[]>([]);
-  /** 已正确放入瓶中的碎片字（按顺序） */
-  const [placed, setPlaced] = useState<string[]>([]);
-  /** 瓶口错误提示 */
-  const [bottleMsg, setBottleMsg] = useState("");
-  /** 拖拽中的碎片 */
-  const [dragging, setDragging] = useState<string | null>(null);
-  /** 移动端：拾取的碎片 */
-  const [picked, setPicked] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const allCollected = collected.length === fragmentOrder.length;
-  const allPlaced = placed.length === fragmentOrder.length;
 
   function onItemSolved(item: Room3Item) {
     if (solvedItems.has(item.id)) return;
-    setSolvedItems(new Set(solvedItems).add(item.id));
-    setCollected([...collected, item.fragment]);
-  }
-
-  /** 待放入瓶中的碎片池（已收集 - 已放入） */
-  const poolFragments = useMemo(
-    () => collected.filter((f) => !placed.includes(f)),
-    [collected, placed],
-  );
-
-  function tryPlace(fragment: string) {
-    if (!fragment) return;
-    const expected = fragmentOrder[placed.length];
-    if (fragment === expected) {
-      setPlaced([...placed, fragment]);
-      setBottleMsg("");
-    } else {
-      setBottleMsg(meta.bottleWrongOrder);
+    const next = new Set(solvedItems).add(item.id);
+    setSolvedItems(next);
+    const nextCollected = [...collected, item.fragment];
+    setCollected(nextCollected);
+    if (nextCollected.length === fragmentOrder.length) {
+      setTimeout(() => setShowSuccess(true), 600);
     }
-    setDragging(null);
-    setPicked(null);
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6">
-      <header className="text-center">
-        <p className="text-xs tracking-[0.3em] text-muted-foreground">
+    <div
+      className="relative w-full overflow-hidden"
+      style={{ height: "calc(100vh - 49px)" }}
+    >
+      {/* 背景图 */}
+      <img
+        src={sceneImg}
+        alt="未来的一日行程单 · 桌面场景"
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+      {/* 轻暗角，提升热点对比 */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(0,0,0,0.25)_100%)]" />
+
+      {/* 左上角标题浮层 */}
+      <div className="absolute left-3 top-3 z-10 rounded-xl border border-white/40 bg-white/70 px-3 py-2 text-left shadow-lg backdrop-blur">
+        <p className="text-[10px] tracking-[0.3em] text-muted-foreground">
           房间 {meta.index} / {meta.total}
         </p>
-        <h2 className="mt-1 font-serif text-3xl text-foreground sm:text-4xl">
-          《{meta.name}》
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">{meta.subtitle}</p>
-      </header>
-
-      {/* 桌面场景 */}
-      <div
-        className="relative w-full overflow-hidden rounded-3xl border-2 border-[oklch(0.45_0.06_45)] shadow-2xl"
-        style={{
-          aspectRatio: "16 / 9",
-          background:
-            "radial-gradient(ellipse at 50% 30%, oklch(0.97 0.025 90) 0%, oklch(0.90 0.04 80) 55%, oklch(0.78 0.06 70) 100%)",
-        }}
-      >
-        {/* 大白桌面（透视梯形） */}
-        <div
-          className="absolute left-1/2 top-[14%] h-[80%] w-[88%] -translate-x-1/2 rounded-2xl shadow-2xl"
-          style={{
-            background: "linear-gradient(180deg, #FFFCF5 0%, #F2EAD8 100%)",
-            clipPath: "polygon(8% 0, 92% 0, 100% 100%, 0 100%)",
-          }}
-        />
-        {/* 桌面光晕 */}
-        <div className="pointer-events-none absolute left-1/2 top-0 h-40 w-[80%] -translate-x-1/2 rounded-full bg-[oklch(0.92_0.075_85)] opacity-50 blur-3xl" />
-
-        {/* 5 个桌面物件（卡通 SVG） */}
-        {items.map((it) => {
-          const done = solvedItems.has(it.id);
-          const Svg = ITEM_SVG[it.id];
-          return (
-            <button
-              key={it.id}
-              onClick={() => setOpenItem(it)}
-              style={{ left: `${it.x}%`, top: `${it.y}%` }}
-              className="group absolute w-[14%] -translate-x-1/2 -translate-y-1/2 transition hover:scale-110"
-              title={it.label}
-            >
-              <div className={`relative ${done ? "opacity-60" : ""}`}>
-                {Svg ? <Svg /> : <span className="text-5xl">{it.icon}</span>}
-                {!done && (
-                  <span className="pointer-events-none absolute inset-0 -z-10 animate-ping rounded-2xl border-2 border-[oklch(0.80_0.135_80)]" />
-                )}
-                {done && (
-                  <span className="absolute -right-1 -top-1 rounded-full bg-[oklch(0.58_0.08_145)] px-1.5 text-[10px] text-white">
-                    ✓
-                  </span>
-                )}
-              </div>
-              <div className="mt-1 rounded bg-[#3E2F2A]/85 px-1.5 py-0.5 text-center text-[10px] text-white">
-                {it.label}
-              </div>
-            </button>
-          );
-        })}
-
-        {/* 通往下一关的门 + 许愿瓶 */}
-        <div className="absolute right-2 top-1/2 flex -translate-y-1/2 items-end gap-2">
-          <Bottle
-            placed={placed.length}
-            total={fragmentOrder.length}
-            ready={allCollected}
-            allPlaced={allPlaced}
-            onDropFragment={(f) => tryPlace(f)}
-            onClick={() => picked && tryPlace(picked)}
-          />
-          <div className="w-[60px]">
-            <IsoDoor locked={!allPlaced} />
-            <p className="mt-1 text-center text-[10px] text-[#3E2F2A]/80">最终页 →</p>
-          </div>
-        </div>
-
-        {/* 氛围文字 */}
-        <p className="pointer-events-none absolute left-3 bottom-2 max-w-xs text-[10px] italic text-[#3E2F2A]/70">
-          {meta.ambient}
+        <h2 className="font-serif text-lg text-foreground">《{meta.name}》</h2>
+        <p className="mt-0.5 text-[11px] text-muted-foreground">
+          碎片 {collected.length} / {fragmentOrder.length}
         </p>
       </div>
 
-      {/* 碎片收集面板 */}
-      <section className="rounded-2xl border border-border bg-card/80 p-5 backdrop-blur">
-        <div className="mb-3 flex items-center justify-between">
-          <p className="text-sm font-medium text-card-foreground">
-            愿望碎片 {collected.length} / {fragmentOrder.length}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {!allCollected
-              ? meta.bottleHintEmpty
-              : !allPlaced
-                ? "把碎片拖进瓶子（或点选碎片 → 点瓶子）"
-                : "全部就位 ✨"}
-          </p>
-        </div>
-
-        {/* 碎片池 */}
-        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-border bg-background/50 p-3">
-          {collected.length === 0 && (
-            <span className="text-xs text-muted-foreground">
-              还没有碎片，去桌面上点点看～
-            </span>
-          )}
-          {poolFragments.map((f, i) => (
-            <button
-              key={`${f}-${i}`}
-              draggable
-              onDragStart={(e) => {
-                setDragging(f);
-                e.dataTransfer.setData("text/plain", f);
-              }}
-              onDragEnd={() => setDragging(null)}
-              onClick={() => setPicked(picked === f ? null : f)}
-              className={`flex h-12 w-12 items-center justify-center rounded-lg border-2 font-serif text-2xl shadow-sm transition ${
-                picked === f
-                  ? "border-primary bg-primary/10 scale-110"
-                  : "border-amber-300 bg-white hover:scale-105"
-              } ${dragging === f ? "opacity-40" : ""}`}
-              title="拖入许愿瓶，或点选后点瓶子"
-            >
-              {f}
-            </button>
-          ))}
-          {/* 已放入的显示在右侧灰色区 */}
-          {placed.length > 0 && (
-            <>
-              <span className="mx-2 text-xs text-muted-foreground">已就位 →</span>
-              {placed.map((f, i) => (
-                <span
-                  key={`p-${i}`}
-                  className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-emerald-400 bg-emerald-50 font-serif text-2xl text-emerald-700"
-                >
-                  {f}
-                </span>
-              ))}
-            </>
-          )}
-        </div>
-
-        {bottleMsg && (
-          <p className="mt-3 text-xs text-destructive">{bottleMsg}</p>
-        )}
-
-        {allPlaced && (
+      {/* 5 个物件热点 */}
+      {items.map((it) => {
+        const spot = HOTSPOTS[it.id];
+        if (!spot) return null;
+        const done = solvedItems.has(it.id);
+        return (
           <button
-            onClick={onComplete}
-            className="mt-4 w-full rounded-full bg-primary px-8 py-3 text-sm font-medium text-primary-foreground shadow-lg transition hover:opacity-90"
+            key={it.id}
+            onClick={() => setOpenItem(it)}
+            style={{
+              left: `${spot.x}%`,
+              top: `${spot.y}%`,
+              width: `${spot.w}%`,
+              aspectRatio: "1 / 1",
+            }}
+            className="group absolute -translate-x-1/2 -translate-y-1/2"
+            title={it.label}
           >
-            {meta.nextCta} →
+            {!done && (
+              <>
+                <span className="pointer-events-none absolute inset-0 animate-ping rounded-full border-2 border-amber-300/80" />
+                <span className="pointer-events-none absolute inset-2 rounded-full ring-2 ring-amber-300/70 shadow-[0_0_18px_4px_rgba(252,211,77,0.55)]" />
+              </>
+            )}
+            {done && (
+              <span className="absolute left-1/2 top-1/2 flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-emerald-500 text-xs text-white shadow-lg">
+                ✓
+              </span>
+            )}
+            <span className="pointer-events-none absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-[#3E2F2A]/85 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition group-hover:opacity-100">
+              {it.label}
+            </span>
           </button>
+        );
+      })}
+
+      {/* 许愿瓶（柜子上） */}
+      <div
+        style={{
+          left: `${BOTTLE_POS.x}%`,
+          top: `${BOTTLE_POS.y}%`,
+          width: `${BOTTLE_POS.w}%`,
+          aspectRatio: "1 / 2",
+        }}
+        className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
+        title={allCollected ? "许愿瓶被点亮了" : `还差 ${fragmentOrder.length - collected.length} 片`}
+      >
+        {allCollected && (
+          <>
+            <span className="absolute inset-0 animate-pulse rounded-full bg-amber-300/40 blur-2xl" />
+            <span className="absolute inset-0 rounded-full shadow-[0_0_40px_12px_rgba(252,211,77,0.75)]" />
+          </>
         )}
-      </section>
+      </div>
+
+      {/* 集齐后：门上发光按钮"进入下一关" */}
+      {allCollected && (
+        <button
+          onClick={onComplete}
+          style={{
+            left: `${DOOR_BTN_POS.x}%`,
+            top: `${DOOR_BTN_POS.y}%`,
+          }}
+          className="absolute z-20 -translate-x-1/2 -translate-y-1/2 animate-fade-in rounded-full bg-amber-300/90 px-5 py-2 text-xs font-semibold text-amber-950 shadow-[0_0_24px_6px_rgba(252,211,77,0.75)] ring-1 ring-amber-200 transition hover:scale-105"
+        >
+          进入下一关 →
+        </button>
+      )}
 
       {/* 答题弹窗 */}
       <ItemModal
         item={openItem}
         alreadyDone={openItem ? solvedItems.has(openItem.id) : false}
         onClose={() => setOpenItem(null)}
-        onCorrect={(it) => {
-          onItemSolved(it);
-        }}
+        onCorrect={(it) => onItemSolved(it)}
       />
 
-      {/* 成功通关 toast */}
-      <Modal open={allPlaced} onClose={onComplete} title="✨ 许愿瓶亮了">
+      {/* 集齐成功提示 */}
+      <Modal open={showSuccess} onClose={() => setShowSuccess(false)} title="✨ 许愿瓶亮了">
         {meta.successText}
       </Modal>
-    </div>
-  );
-}
-
-/** 许愿瓶（含放置/亮灯/星星动效） */
-function Bottle({
-  placed,
-  total,
-  ready,
-  allPlaced,
-  onDropFragment,
-  onClick,
-}: {
-  placed: number;
-  total: number;
-  ready: boolean;
-  allPlaced: boolean;
-  onDropFragment: (f: string) => void;
-  onClick: () => void;
-}) {
-  const [over, setOver] = useState(false);
-  const lit = ready || placed > 0;
-
-  return (
-    <div
-      onDragOver={(e) => { e.preventDefault(); setOver(true); }}
-      onDragLeave={() => setOver(false)}
-      onDrop={(e) => {
-        e.preventDefault();
-        setOver(false);
-        const f = e.dataTransfer.getData("text/plain");
-        if (f) onDropFragment(f);
-      }}
-      onClick={onClick}
-      className={`relative flex w-[70px] cursor-pointer flex-col items-center transition ${over ? "scale-105" : ""}`}
-      title={ready ? "把碎片放进来" : "还需要更多碎片"}
-    >
-      <IsoBottle lit={lit} filled={allPlaced} className="w-full" />
-      <div className="-mt-2 rounded bg-[#3E2F2A]/85 px-1.5 py-0.5 text-[10px] font-semibold text-white">
-        {placed} / {total}
-      </div>
     </div>
   );
 }
@@ -297,7 +165,6 @@ function ItemModal({
   const [msg, setMsg] = useState("");
   const [justSolved, setJustSolved] = useState(false);
 
-  // 切换 item 时重置
   const key = item?.id ?? "none";
   useEffect(() => {
     setValues(item ? item.fields.map(() => "") : []);
@@ -326,7 +193,6 @@ function ItemModal({
 
   return (
     <Modal open={!!item} onClose={onClose} title={item.label}>
-      {/* 物件视觉 */}
       <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 p-3 font-mono text-xs leading-6 text-amber-900">
         {item.visual.map((line, i) => (
           <div key={i}>{line}</div>
