@@ -387,11 +387,12 @@ function ItemModal({
         />
       </div>
 
-      {alreadyDone ? (
+      {solved ? null : alreadyDone ? (
         <div className="rounded-lg bg-amber-50 p-3 text-center text-sm text-amber-800">
           这个线索已经收集过啦～
         </div>
-      ) : solved ? (
+      ) : null}
+      {solved ? (
         <div className="space-y-4">
           <div className="rounded-lg bg-emerald-50 p-4 text-center">
             <p className="mb-3 text-sm font-medium text-emerald-700">
