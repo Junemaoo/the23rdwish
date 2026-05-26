@@ -24,6 +24,7 @@ export function Room3({ onComplete }: { onComplete: () => void }) {
   const [solvedItems, setSolvedItems] = useState<Set<string>>(new Set());
   const [collected, setCollected] = useState<string[]>([]);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [bottleNudge, setBottleNudge] = useState(false);
 
   const allCollected = collected.length === fragmentOrder.length;
 
