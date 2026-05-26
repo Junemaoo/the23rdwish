@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 // 通用弹窗
 export function Modal({
@@ -13,13 +14,14 @@ export function Modal({
   children: React.ReactNode;
 }) {
   if (!open) return null;
-  return (
+  if (typeof document === "undefined") return null;
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 animate-in fade-in"
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/50 px-4 py-8 animate-in fade-in"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-2xl"
+        className="relative my-auto w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {title && (
@@ -37,7 +39,8 @@ export function Modal({
           知道了
         </button>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
