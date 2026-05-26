@@ -101,13 +101,25 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
   }
 
   return (
-    <div className="relative w-full min-h-[100svh] overflow-hidden bg-black">
+    <div
+      className="relative w-full min-h-[100svh] overflow-hidden bg-black"
+      onMouseMove={(e) => {
+        if (!debug) return;
+        const r = e.currentTarget.getBoundingClientRect();
+        setCursor({
+          x: ((e.clientX - r.left) / r.width) * 100,
+          y: ((e.clientY - r.top) / r.height) * 100,
+        });
+      }}
+    >
       <img
         src={room1Bg}
         alt=""
         className="absolute inset-0 h-full w-full select-none object-cover"
         draggable={false}
       />
+
+
 
       {/* 左上角：线索收集册 */}
       <button
