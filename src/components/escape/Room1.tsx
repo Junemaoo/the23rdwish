@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { BookOpen, X } from "lucide-react";
+import { BookOpen, X, Delete, Check } from "lucide-react";
 import { ROOMS } from "./config";
-import { Modal, AnswerInput } from "./ui";
+import { Modal } from "./ui";
+
 import room1Bg from "@/assets/room1-bg.jpg";
 import room1Calendar from "@/assets/room1-calendar.jpg";
 import room1Laptop from "@/assets/room1-laptop.png";
@@ -255,18 +256,20 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
         </div>
       )}
 
-      <Modal open={showAnswer && !solved} onClose={() => setShowAnswer(false)} title="🔒 数字密码锁">
-        <AnswerInput
+      {showAnswer && !solved && (
+        <PasscodePad
           prompt={config.puzzlePrompt}
           hint={config.puzzleHint}
           answer={config.answer}
           errorMessages={config.errorMessages}
+          onClose={() => setShowAnswer(false)}
           onSolved={() => {
             setSolved(true);
             setShowAnswer(false);
           }}
         />
-      </Modal>
+      )}
+
 
       <Modal open={solved} onClose={onComplete} title="🔓 门开了">
         <div className="space-y-4">
@@ -282,3 +285,225 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
     </div>
   );
 }
+
+function PasscodePad({
+  prompt,
+  hint,
+  answer,
+  errorMessages,
+  onSolved,
+  onClose,
+}: {
+  prompt: string;
+  hint: string;
+  answer: string;
+  errorMessages?: string[];
+  onSolved: () => void;
+  onClose: () => void;
+}) {
+  const [value, setValue] = useState("");
+  const [wrong, setWrong] = useState(0);
+  const [msg, setMsg] = useState("");
+  const [error, setError] = useState(false);
+  const [pressed, setPressed] = useState<string | null>(null);
+  const maxLen = answer.length + 2;
+
+  function press(key: string) {
+    setPressed(key);
+    window.setTimeout(() => setPressed((p) => (p === key ? null : p)), 120);
+  }
+
+  function input(d: string) {
+    press(d);
+    setMsg("");
+    setError(false);
+    setValue((v) => (v.length >= maxLen ? v : v + d));
+  }
+
+  function backspace() {
+    press("back");
+    setMsg("");
+    setError(false);
+    setValue((v) => v.slice(0, -1));
+  }
+
+  function submit() {
+    press("ok");
+    const v = value.trim().toLowerCase();
+    const a = answer.trim().toLowerCase();
+    if (!v) return;
+    if (v === a) {
+      setMsg("");
+      onSolved();
+      return;
+    }
+    const next = wrong + 1;
+    setWrong(next);
+    setError(true);
+    window.setTimeout(() => setError(false), 220);
+    if (errorMessages && errorMessages.length > 0) {
+      setMsg(errorMessages[Math.min(next - 1, errorMessages.length - 1)]);
+    } else if (next >= 3) {
+      setMsg(`不对哦…… 小提示：${hint}`);
+    } else {
+      setMsg(`再想想（已尝试 ${next} 次）`);
+    }
+    setValue("");
+  }
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+      if (e.key === "Enter") {
+        e.preventDefault();
+        submit();
+        return;
+      }
+      if (e.key === "Backspace") {
+        e.preventDefault();
+        backspace();
+        return;
+      }
+      if (/^[0-9]$/.test(e.key)) {
+        e.preventDefault();
+        input(e.key);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, wrong]);
+
+  const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 px-4 animate-in fade-in"
+      onClick={onClose}
+    >
+      <button
+        onClick={onClose}
+        className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white/80 transition hover:bg-white/20"
+        aria-label="关闭"
+      >
+        <X className="h-5 w-5" />
+      </button>
+
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-xs select-none rounded-[28px] p-5 shadow-2xl"
+        style={{
+          background:
+            "linear-gradient(145deg, #d8dde2 0%, #9aa1a8 40%, #c7ccd1 60%, #6e7378 100%)",
+        }}
+      >
+        <div
+          className="flex flex-col items-center gap-4 rounded-[20px] p-5"
+          style={{ background: "linear-gradient(180deg, #0b0b0e 0%, #15161a 100%)" }}
+        >
+          <h3 className="text-center text-lg font-semibold tracking-wide text-white/90">
+            请输入本关密码
+          </h3>
+          <p className="-mt-2 text-center text-[11px] text-white/50">{prompt}</p>
+
+          {/* 电子屏 */}
+          <div
+            className="flex h-14 w-full items-center justify-center rounded-md border border-white/10 transition-colors"
+            style={{
+              background: error ? "#2a0d0d" : "#0a1418",
+              boxShadow:
+                "inset 0 0 14px rgba(0,0,0,.8), inset 0 0 2px rgba(120,200,255,.15)",
+            }}
+          >
+            <span
+              className="font-mono text-3xl tracking-[0.45em]"
+              style={{
+                color: error ? "#ff6b6b" : "#7ee0ff",
+                textShadow: error
+                  ? "0 0 8px rgba(255,80,80,.7)"
+                  : "0 0 8px rgba(120,220,255,.7)",
+              }}
+            >
+              {value || "—".repeat(Math.max(answer.length, 4))}
+            </span>
+          </div>
+
+          {/* 数字键盘 */}
+          <div className="grid w-full grid-cols-3 gap-3">
+            {keys.map((k) => (
+              <PadButton
+                key={k}
+                active={pressed === k}
+                onClick={() => input(k)}
+              >
+                {k}
+              </PadButton>
+            ))}
+            <PadButton active={pressed === "back"} onClick={backspace} tone="muted">
+              <Delete className="h-5 w-5" />
+            </PadButton>
+            <PadButton active={pressed === "0"} onClick={() => input("0")}>
+              0
+            </PadButton>
+            <PadButton active={pressed === "ok"} onClick={submit} tone="accent">
+              <Check className="h-5 w-5" />
+            </PadButton>
+          </div>
+
+          {msg && (
+            <p className="text-center text-xs text-red-400">{msg}</p>
+          )}
+          <p className="text-[10px] text-white/40">支持键盘 0-9 / Enter / Backspace</p>
+        </div>
+
+        {/* ACCESS 标签 */}
+        <div className="mt-3 flex justify-center">
+          <div
+            className="rounded-md px-6 py-1.5 text-xs font-semibold tracking-[0.35em] text-white/80"
+            style={{
+              background:
+                "linear-gradient(180deg, #2a2c30 0%, #15161a 100%)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,.08)",
+            }}
+          >
+            ACCESS
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PadButton({
+  children,
+  onClick,
+  active,
+  tone = "default",
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  active?: boolean;
+  tone?: "default" | "muted" | "accent";
+}) {
+  const colors =
+    tone === "accent"
+      ? "text-emerald-300"
+      : tone === "muted"
+        ? "text-white/60"
+        : "text-cyan-200";
+  return (
+    <button
+      onClick={onClick}
+      className={`flex h-12 items-center justify-center rounded-xl border border-white/10 font-mono text-xl transition active:scale-95 ${colors} ${
+        active ? "bg-white/15 shadow-[0_0_12px_rgba(120,220,255,.5)]" : "bg-white/[0.04] hover:bg-white/10"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
