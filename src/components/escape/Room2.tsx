@@ -79,7 +79,6 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
     if (prev >= 0) next[prev] = null;
     next[slotIdx] = exId;
     setSlots(next);
-    setPicked(null);
     setErrMsg("");
   }
 
