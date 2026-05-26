@@ -191,6 +191,19 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
           }}
         />
 
+        {/* 排序完成后门前发光按钮 */}
+        {solved && (
+          <button
+            onClick={onComplete}
+            className="absolute z-20 -translate-x-1/2 -translate-y-1/2 animate-fade-in whitespace-nowrap rounded-full bg-amber-300/90 px-3 py-1.5 text-[11px] font-medium text-amber-950 shadow-[0_0_20px_4px_rgba(252,211,77,0.7)] ring-1 ring-amber-200 transition hover:bg-amber-200 hover:shadow-[0_0_28px_8px_rgba(252,211,77,0.9)]"
+            style={{ left: "45.9%", top: "13.6%" }}
+          >
+            进入下一关 →
+          </button>
+        )}
+
+
+
 
         {/* 布告板 — 覆盖墙上原告示牌，点击弹出排序面板 */}
         <button
