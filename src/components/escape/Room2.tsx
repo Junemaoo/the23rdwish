@@ -243,8 +243,9 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
         )}
       </div>
 
-      {/* 排序区 */}
-      <section className="rounded-2xl border border-border bg-card/80 p-5 backdrop-blur">
+      {/* 排序区 — 浮在底部 */}
+      <section className="absolute bottom-3 left-1/2 z-20 w-[min(960px,96vw)] -translate-x-1/2 rounded-2xl border border-border bg-card/85 p-4 shadow-2xl backdrop-blur">
+
         <p className="mb-1 text-sm font-medium text-card-foreground">{puzzlePrompt}</p>
         <p className="mb-4 text-xs text-muted-foreground">
           支持拖拽；移动端可"点选展品 → 点击卡槽"放置。点击展厅中的展柜可查看详情。
