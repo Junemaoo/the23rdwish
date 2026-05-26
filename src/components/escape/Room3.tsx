@@ -71,10 +71,13 @@ export function Room3({ onComplete }: { onComplete: () => void }) {
                 width: `${spot.w}%`,
                 aspectRatio: "1 / 1",
               }}
-              className="absolute z-10 -translate-x-1/2 -translate-y-1/2 cursor-pointer"
+              className="absolute z-10 -translate-x-1/2 -translate-y-1/2 cursor-pointer border-2 border-dashed border-yellow-400 bg-yellow-400/15"
               title={it.label}
               aria-label={it.label}
             >
+              <span className="pointer-events-none absolute left-1 top-1 rounded bg-yellow-400 px-1 text-[10px] font-bold text-black">
+                {it.id}
+              </span>
               {done && (
                 <span className="absolute left-1/2 top-1/2 flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-emerald-500 text-xs text-white shadow-lg">
                   ✓
