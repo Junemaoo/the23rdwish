@@ -39,9 +39,9 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
   const clueImgRef = useRef<HTMLImageElement | null>(null);
 
   const hotspots: ClueSpot[] = [
-    { id: "pc-left",  title: "zcx 的电脑屏幕", image: room1Laptop,   left: 8,  top: 50, w: 14, h: 14 },
+    { id: "pc-left",  title: "mjm 的电脑屏幕", image: room1Laptop,   left: 8,  top: 50, w: 14, h: 14 },
     { id: "calendar", title: "墙上的日历",     image: room1Calendar, left: 41, top: 27, w: 9,  h: 22 },
-    { id: "pc-right", title: "mjm 的电脑屏幕", image: room1Desktop,  left: 70, top: 26, w: 14, h: 14 },
+    { id: "pc-right", title: "zcx 的电脑屏幕", image: room1Desktop,  left: 70, top: 26, w: 14, h: 14 },
   ];
 
   useEffect(() => {
@@ -157,9 +157,9 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
           </button>
           <div
             onClick={(e) => e.stopPropagation()}
-            className="flex w-full max-w-sm flex-col items-center gap-5 rounded-3xl bg-[#f5ede0] px-6 py-7 shadow-2xl"
+            className="flex w-full max-w-lg flex-col items-center gap-6 rounded-3xl bg-[#f5ede0] px-8 py-9 shadow-2xl"
           >
-            <h3 className="text-center text-2xl font-semibold text-[#1a1a1a]">
+            <h3 className="text-center text-3xl font-semibold text-[#1a1a1a]">
               {openClue.title}
             </h3>
             <div className="flex w-full items-center justify-center">
@@ -168,13 +168,13 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
                 src={openClue.image}
                 alt=""
                 draggable={false}
-                className="h-auto w-[75%] select-none object-contain"
+                className="h-auto max-h-[55vh] w-[85%] select-none object-contain"
               />
             </div>
             <button
               onClick={handleCollect}
               disabled={collected.has(openClue.id)}
-              className="w-[70%] rounded-full bg-[#c97259] px-6 py-3 text-base font-medium text-white shadow-md transition hover:bg-[#b9614b] disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-[65%] rounded-full bg-[#c97259] px-6 py-3.5 text-lg font-medium text-white shadow-md transition hover:bg-[#b9614b] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {collected.has(openClue.id) ? "已收集 ✓" : "收集线索"}
             </button>
