@@ -1,27 +1,43 @@
-## 房间 1 密码锁特写改造
+# 开门动画 & 进入下一关按钮
 
-### 1. 视觉（参考上传的门禁键盘图）
-- 点击场景中密码锁热点后，弹出一个居中的特写卡片（替换现在的小 Modal + AnswerInput）。
-- 卡片样式：金属银边框 + 黑色面板，圆角，仿照参考图的"竖向门禁键盘"质感。
-- 顶部标题改为 **"请输入本关密码"**（白色字，居中）。
-- 标题下方加一块 **电子屏幕**：深色背景 + 数码管风格字体（用等宽字体 + 浅蓝色 `text-cyan-300`，加一点发光阴影），实时显示已输入内容；为空时显示占位横线。
-- 屏幕下方排 **3×4 数字键盘**：`1 2 3 / 4 5 6 / 7 8 9 / ⌫ 0 ✓`（左下角退格，右下角确认）。按钮为圆形/圆角方块，淡蓝色字，按下时有高亮反馈。
-- 底部一个 "ACCESS" 风格的标签条作为装饰（呼应参考图）。
+## 目标
+密码输入正确后：
+1. 不再弹出"🔓 门开了"的 Modal（删除）
+2. 在场景中门的位置上叠加一扇可"向外推开"的门，播放铰链旋转动画
+3. 动画结束后，在门洞内出现一颗"进入下一关 →"按钮
 
-### 2. 交互
-- **点击按钮输入**：点数字键追加字符；⌫ 删除最后一位；✓ 提交。
-- **键盘输入**：弹窗打开时聚焦一个隐藏 input（或监听 `keydown`），支持 0-9 数字键、Backspace 删除、Enter 提交、Esc 关闭。同时高亮对应的屏上按钮（短暂 active 态）作为视觉反馈。
-- 提交逻辑复用现有 `ROOMS[0].answer` 校验；错误时屏幕红色闪烁一次 + 显示 `errorMessages` 当前提示；正确时进入现有 `solved` 流程。
+## 实现
 
-### 3. 代码改动范围
-- 只改 `src/components/escape/Room1.tsx`：
-  - 新增内部组件 `PasscodePad`（电子屏 + 数字键盘 + 键盘监听）。
-  - 替换原来 `showAnswer` 弹窗里的 `<Modal>` + `<AnswerInput>` 为新的特写卡片。
-  - 保留密码锁热点位置和 `solved` 后的"门开了"流程。
-- 不动其他文件（线索卡、收集册、`ui.tsx` 的 `AnswerInput` 仍被其他 Room 复用，不删）。
+### 1. `src/components/escape/Room1.tsx`
+- 删除 `<Modal open={solved} ...>` 整段（lines 275-285）。
+- 在 hotspots/密码锁之后，新增一段「门动画层」，仅当 `solved === true` 时渲染：
+  - 一个绝对定位的容器，对齐到木门位置：`left:60% top:25% width:14% height:55%`。
+  - 容器内部：
+    - 底层"门洞"：深色渐变 + 中心暖色光晕（`bg-gradient-radial from-amber-200/90 via-amber-500/40 to-black/80`），代表门后透出的光。
+    - 上层"门板"：使用一张木门贴图（或纯 CSS 木纹渐变 + 高光 + 门把手小圆点）。
+      - `transform-origin: left center`（沿左侧铰链向外推）
+      - 初始 `rotateY(0deg)`，加上 `transition: transform 1.2s cubic-bezier(.22,.61,.36,1)`；solved 后用 `useEffect` 在下一帧设置 `rotateY(-75deg)` 触发动画。
+      - 配合轻微 `perspective: 1200px`（加在父容器）让旋转有立体感。
+    - 一段开门音效感的光晕脉冲（可选：`animate-pulse` 在光晕层）。
+  - 进入按钮：`solved && doorOpened` 时才渲染（用 `setTimeout(1200)` 或 `onTransitionEnd` 切 `doorOpened=true`），定位在门洞中央：
+    ```
+    absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
+    rounded-full bg-primary px-6 py-2 text-sm text-primary-foreground
+    shadow-[0_0_30px_rgba(255,200,120,.7)] animate-in fade-in zoom-in
+    ```
+    文案使用 `config.nextCta`（"进入下一关"），点击调用 `onComplete`。
+- 新增 state：`const [doorOpened, setDoorOpened] = useState(false)`，并在 `solved` 变 true 时启动定时器；卸载时清除。
 
-### 技术细节
-- 键盘事件用 `useEffect` 在弹窗打开时 `window.addEventListener('keydown', ...)`，关闭时移除；阻止与 ESC 关闭线索卡的冲突（仅在密码弹窗打开时拦截数字/Enter/Backspace）。
-- 电子屏字体：`font-mono tracking-[0.4em] text-cyan-300` + `text-shadow` 用内联 style 模拟发光。
-- 错误闪烁：用一个 `error` 布尔 state + `transition-colors` 切换屏幕底色 200ms。
-- 输入长度上限按答案长度 + 2 截断，避免无限输入。
+### 2. 视觉细节
+- 门板用 CSS 实现，避免新增素材：
+  - 背景：`linear-gradient(180deg,#6b4423,#4a2d18)` + 木纹叠层（重复线性渐变）
+  - 边框：`border border-amber-950/60 ring-1 ring-black/40`
+  - 门把手：右侧居中一个 `w-1.5 h-1.5 rounded-full bg-yellow-300 shadow`
+- 容器加 `pointer-events-none`，让按钮独立处理 `pointer-events-auto`，避免门板挡住按钮点击。
+
+### 3. 不动的部分
+- `config.successText`、`config.nextCta`、`onComplete` 流程保持。
+- 密码输入、关闭逻辑不变。
+
+## 备注
+门的定位 `left:60% top:25% w:14% h:55%` 是按当前背景图的估算值，实装后如果发现偏移可再微调（这是纯 CSS 数值，不需重新生成图）。
