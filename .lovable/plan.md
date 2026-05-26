@@ -1,41 +1,67 @@
-# 房间 1：物件特写 + 线索收集
+## 房间 1 线索特写 + 收集动画 改造
 
-## 1. 生成两张新的物件特写图（深色背景）
+### 1. 替换/新增物件图
 
-- `src/assets/room1-laptop.jpg`：你在伦敦的笔记本特写，锁屏显示 `05:20`，壁纸是海边照片，黑色背景，电影感打光。
-- `src/assets/room1-desktop.jpg`：北京工位的台式机特写，屏幕显示 `14:20`，旁边摆几只 Labubu，黑色背景。
-- 已有的 `room1-calendar.jpg` 复用，作为日历的特写图。
+- `src/assets/room1-laptop.png`（新，替换原 jpg）：直接使用上传的 `room1-macbook锁屏.png`，**抠去白底**变成透明 PNG，屏幕显示 `5:20 伦敦`。
+- `src/assets/room1-desktop.png`（新，替换原 jpg）：直接使用上传的 `1420_北京，中国.png`，**抠去白底**变成透明 PNG，屏幕显示 `14:20 北京`。
+- `room1-calendar.jpg` 保持不变。
 
-## 2. Room1.tsx 改造
+（透明 PNG 直接放在米色卡片中央，效果就和上传的日历示意图一致）
 
-### 物件特写 Modal
-- 在 `hotspots` 数组里给每个热点加一个 `image` 字段，分别指向上面三张图。
-- 不再使用 `ui.tsx` 里的通用 `Modal`（它带有"知道了"按钮和文字标题）。在 Room1 内部新建一个 `ClueModal`：
-  - 全屏暗色背景 `bg-black/85`，点击空白处或按 Esc 关闭。
-  - 中央展示一张大图，圆角 + 阴影，最多 `max-w-2xl`。
-  - **完全不显示** `clueTitle` / `clueText`。
-  - 底部一个按钮"收集线索"，点击后把该 hotspot 加入"已收集"列表并关闭弹窗。如果已经收集过，按钮变成"已收集 ✓" 且 disabled。
+### 2. 统一的线索卡片样式（参考用户上传的日历示意图）
 
-### 线索状态
-- 用 `useState<Set<string>>` 保存已收集的 hotspot id（`pc-left` / `pc-right` / `calendar`）。
+新建 `ClueCard` 视觉规范，三个线索点开后都使用：
 
-### 左上角线索图标
-- 在房间容器内、绝对定位 `top-4 left-4 z-20`，一个圆形按钮，里头放 lucide `Notebook` 或 `BookOpen` 图标，右上角小角标显示 `已收集/3`。
-- 点击打开一个新的 `InventoryModal`：暗色面板，列出三个槽位。
-  - 已收集的：显示该物件的小缩略图（同一张特写图 thumbnail）+ 物件名称（用 `cfg.label`，例如"你的笔记本"）。
-  - 未收集的：灰色问号占位 `?`，文字"尚未发现"。
-- 这里**也不显示**任何线索文字（保持纯探索氛围），只展示图本身——线索靠玩家自己看图领悟。
+- 弹层背景：暗色遮罩 `bg-black/85`
+- 卡片：米色面板 `bg-[#f5ede0]`，圆角 `rounded-3xl`，padding 充足，宽度约 `max-w-sm`
+- 顶部标题（黑色，居中，semibold，`text-2xl`）
+- 中部物件图（透明 PNG，居中，约占卡片宽度 70%）
+- 底部「收集线索」按钮：陶土红 `bg-[#c97259]`、白字、圆角胶囊形、宽度约卡片 70%、`text-base`
+- 标题字号 / 图片 / 按钮 三者比例协调（图最大，标题与按钮字号接近）
 
-### 密码锁热点保持不动
-- 现有的密码锁按钮、答题 Modal、成功 Modal 全部保留不动。
+三个线索的标题：
+| id | 标题 |
+|---|---|
+| `pc-left` | zcx 的电脑屏幕 |
+| `pc-right` | mjm 的电脑屏幕 |
+| `calendar` | 墙上的日历 |
 
-## 3. 不动的部分
-- `config.ts` 不动（`clueText` 字段保留着，目前只是不再渲染，方便以后改回）。
-- `ui.tsx` 的通用 `Modal` 不动，仍给密码锁/成功页用。
-- 其它房间、路由、顶部进度条全部不动。
+线索本（InventoryModal）里的物件名称同步改为以上三个。
 
-## QA
-- 进入房间 1，点三个物件，分别看到三张暗色背景下的特写图，没有任何文字，只有"收集线索"按钮。
-- 收集后按钮变 "已收集 ✓"，左上角角标 `1/3 → 2/3 → 3/3`。
-- 点左上角图标弹出收集册，已收集位显示缩略图，未收集位显示 `?`。
-- 密码锁按钮、答题、过关流程不受影响。
+### 3. 收集动画特效
+
+点击「收集线索」后：
+
+1. 卡片中的物件图触发一个 ~700ms 的飞行动画：图片 **缩小 + 平移** 到左上角线索本图标位置，同时透明度渐隐到 0。
+2. 与此同时左上角线索本图标 **弹一下**（scale 1 → 1.25 → 1，约 400ms），徽章数字 `+1` 更新。
+3. 动画结束后再关闭弹层并把该 id 加入 `collected`。
+
+技术做法：
+- 用一个绝对定位的 `<img>` clone 叠在弹层上，通过 `requestAnimationFrame` 切换 `transform: translate(...) scale(0.1)` + `opacity: 0`，配合 CSS `transition: all 700ms cubic-bezier(.4,.0,.2,1)`。
+- 起点 = 当前图片的 `getBoundingClientRect()`，终点 = 线索本按钮的 `getBoundingClientRect()`。
+- 线索本图标用 `ref` 拿到位置；动画期间给该按钮加一个 `animate-clue-pop` 类（在 `styles.css` 里定义 keyframes）。
+- 按钮在动画期间 disabled，防止重复点击。
+
+### 4. 文件改动清单
+
+- `src/assets/room1-laptop.png`（新，透明 PNG）
+- `src/assets/room1-desktop.png`（新，透明 PNG）
+- `src/components/escape/Room1.tsx`：
+  - 引入新 PNG，去掉旧 jpg 引用
+  - 给 `hotspots` 加 `title` 字段（zcx 的电脑屏幕 / mjm 的电脑屏幕 / 墙上的日历）
+  - 重写 ClueModal → ClueCard（米色卡片样式）
+  - 加飞行动画逻辑 + 线索本按钮 ref
+  - InventoryModal 用新 `title` 字段
+- `src/styles.css`：添加 `@keyframes clue-pop` 与 `.animate-clue-pop` 工具类
+
+### 5. 不动的部分
+- 密码锁热点、答题 Modal、成功 Modal
+- `config.ts`、`ui.tsx`、其它房间、路由
+- 房间背景 `room1-bg.jpg`
+
+### QA
+- 三个线索弹层视觉与上传的日历示意图一致（米色卡 + 黑标题 + 陶土红胶囊按钮）
+- 标题分别为 zcx / mjm / 墙上的日历
+- 点「收集线索」后，图片飞到左上角图标，图标弹一下，徽章 +1
+- 线索本里三个槽位的标题同步更新
+- 已收集后再点开，按钮显示「已收集 ✓」且 disabled
