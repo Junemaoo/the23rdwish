@@ -35,6 +35,8 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
   const [showInventory, setShowInventory] = useState(false);
   const [flying, setFlying] = useState<FlyingClue | null>(null);
   const [popping, setPopping] = useState(false);
+  const [debug, setDebug] = useState(false);
+  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
 
   const inventoryBtnRef = useRef<HTMLButtonElement | null>(null);
   const clueImgRef = useRef<HTMLImageElement | null>(null);
