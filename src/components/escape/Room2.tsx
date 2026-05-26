@@ -1,14 +1,14 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ROOM_2_DATA, type Exhibit } from "./config";
 import { Modal } from "./ui";
-import { IsoDisplayCase, IsoDoor } from "./iso";
+import room2Bg from "@/assets/room2-hall.png";
 
 /**
  * 房间 2：礼物档案室
- * - 10 个展品沿四面墙顺时针排列，点击查看
- * - 5 个待排序展品在底部托盘，可拖拽到 5 个时间卡槽
- * - 也支持点击拾取再点击卡槽放置（移动端兜底）
- * - "确认排序" → 比对 correctOrder
+ * - 等距展厅渲染图为底，10 个透明热区贴合实际展柜
+ * - 后门 = 进入下一关的热区（需先完成排序）
+ * - 下方时间排序面板保持原逻辑
+ * - 按 D 切换调试网格 / 鼠标坐标 / 热区描边
  */
 export function Room2({ onComplete }: { onComplete: () => void }) {
   const { meta, exhibits, sortablePool, correctOrder, slotLabels, puzzlePrompt, errorMessages, successText, nextCta } =
@@ -18,14 +18,25 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
   const [solved, setSolved] = useState(false);
   const [errMsg, setErrMsg] = useState("");
   const [wrong, setWrong] = useState(0);
+  const [doorHint, setDoorHint] = useState(false);
 
-  // 卡槽 5 个；pool 是未放入的待排序展品
   const [slots, setSlots] = useState<(string | null)[]>([null, null, null, null, null]);
   const inSlots = useMemo(() => new Set(slots.filter(Boolean) as string[]), [slots]);
   const pool = sortablePool.filter((id) => !inSlots.has(id));
 
-  // 移动端：拾取的展品 id
   const [picked, setPicked] = useState<string | null>(null);
+
+  const [debug, setDebug] = useState(false);
+  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "d" || e.key === "D") setDebug((v) => !v);
+      if (e.key === "Escape") setOpenExhibit(null);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   const exhibitMap = useMemo(() => {
     const m = new Map<string, Exhibit>();
@@ -33,17 +44,25 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
     return m;
   }, [exhibits]);
 
-  // 展品在房间中的 % 坐标（顺时针绕墙：上→右→下→左）
-  const wallPositions: { x: number; y: number }[] = [
-    { x: 12, y: 12 }, { x: 32, y: 8 }, { x: 52, y: 8 }, { x: 72, y: 12 }, // 上墙
-    { x: 88, y: 35 }, { x: 88, y: 62 }, // 右墙
-    { x: 72, y: 85 }, { x: 28, y: 85 }, // 下墙
-    { x: 12, y: 62 }, { x: 12, y: 35 }, // 左墙
+  // 10 个展柜在底图中的中心坐标（%）；热区为半透明按钮，hover 高亮
+  const hotspots: { x: number; y: number; w: number; h: number }[] = [
+    { x: 22, y: 38, w: 13, h: 22 }, // 0 水瓶 - 左后
+    { x: 38, y: 30, w: 12, h: 24 }, // 1 电动牙刷 - 中后
+    { x: 50, y: 40, w: 14, h: 22 }, // 2 男士护肤 - 中
+    { x: 64, y: 28, w: 14, h: 22 }, // 3 乐高 - 右后
+    { x: 76, y: 40, w: 13, h: 24 }, // 4 香水 - 右
+    { x: 26, y: 56, w: 13, h: 22 }, // 5 AirPods - 左中
+    { x: 47, y: 64, w: 13, h: 24 }, // 6 T恤 - 中前
+    { x: 74, y: 60, w: 14, h: 24 }, // 7 蛋白粉 - 右中
+    { x: 23, y: 78, w: 14, h: 22 }, // 8 腰包 - 左前
+    { x: 78, y: 82, w: 14, h: 22 }, // 9 Omega-3 - 右前
   ];
+
+  // 后门位置（图中正后方木门）
+  const doorSpot = { x: 50, y: 16, w: 7, h: 18 };
 
   function placeIntoSlot(slotIdx: number, exId: string) {
     const next = [...slots];
-    // 如果该 ex 已在别的槽，先清掉
     const prev = next.findIndex((v) => v === exId);
     if (prev >= 0) next[prev] = null;
     next[slotIdx] = exId;
@@ -81,6 +100,15 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
     setErrMsg("");
   }
 
+  function handleDoor() {
+    if (solved) {
+      onComplete();
+    } else {
+      setDoorHint(true);
+      window.setTimeout(() => setDoorHint(false), 1800);
+    }
+  }
+
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6">
       <header className="text-center">
@@ -93,56 +121,134 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
         <p className="mt-1 text-sm text-muted-foreground">{meta.subtitle}</p>
       </header>
 
-      {/* 展览馆俯视 */}
+      {/* 展览馆 — 等距渲染底图 + 透明热区 */}
       <div
-        className="relative w-full overflow-hidden rounded-3xl border-2 border-[oklch(0.45_0.06_45)] shadow-2xl"
-        style={{
-          aspectRatio: "16 / 9",
-          background:
-            "radial-gradient(ellipse at 50% 30%, oklch(0.55 0.08 60) 0%, oklch(0.38 0.06 50) 60%, oklch(0.24 0.04 45) 100%)",
+        className="relative w-full overflow-hidden rounded-3xl border-2 border-[oklch(0.45_0.06_45)] shadow-2xl bg-black"
+        style={{ aspectRatio: "4 / 3" }}
+        onMouseMove={(e) => {
+          if (!debug) return;
+          const r = e.currentTarget.getBoundingClientRect();
+          setCursor({
+            x: ((e.clientX - r.left) / r.width) * 100,
+            y: ((e.clientY - r.top) / r.height) * 100,
+          });
         }}
       >
-        {/* 木地板 */}
-        <div className="absolute inset-0 wood-floor opacity-95" />
-        {/* 顶部聚光 */}
-        <div className="pointer-events-none absolute left-1/2 top-0 h-40 w-[90%] -translate-x-1/2 rounded-full bg-[oklch(0.92_0.075_85)] opacity-30 blur-3xl" />
-        {/* 中央地毯 */}
-        <div className="absolute left-1/2 top-1/2 h-[60%] w-[55%] -translate-x-1/2 -translate-y-1/2 rounded-lg border-2 border-[oklch(0.40_0.05_45)] bg-[oklch(0.86_0.07_80)]/30" />
-        {/* 通往下一关的门 */}
-        <div className="absolute right-2 top-1/2 w-[10%] -translate-y-1/2">
-          <IsoDoor locked={!solved} />
-          <p className="mt-1 text-center text-[10px] text-amber-50/80">下一间 →</p>
-        </div>
+        <img
+          src={room2Bg}
+          alt="礼物档案室"
+          draggable={false}
+          className="absolute inset-0 h-full w-full select-none object-cover"
+        />
 
-        {/* 氛围文字 */}
-        <p className="pointer-events-none absolute left-1/2 top-[88%] max-w-md -translate-x-1/2 text-center text-[11px] italic text-amber-100/70">
-          {meta.ambient}
-        </p>
+        {/* 后门热区 */}
+        <button
+          onClick={handleDoor}
+          aria-label={solved ? "进入下一关" : "门已锁"}
+          title={solved ? "进入下一关" : "先完成展品排序"}
+          className="absolute cursor-pointer bg-transparent transition hover:bg-amber-200/15 focus:outline-none"
+          style={{
+            left: `${doorSpot.x}%`,
+            top: `${doorSpot.y}%`,
+            width: `${doorSpot.w}%`,
+            height: `${doorSpot.h}%`,
+            transform: "translate(-50%, -50%)",
+          }}
+        />
 
-        {/* 十个展柜 */}
+        {/* 10 个展柜热区 */}
         {exhibits.map((ex, i) => {
-          const p = wallPositions[i];
+          const p = hotspots[i];
+          if (!p) return null;
           return (
             <button
               key={ex.id}
               onClick={() => setOpenExhibit(ex)}
-              style={{ left: `${p.x}%`, top: `${p.y}%` }}
-              className="group absolute w-[9%] -translate-x-1/2 -translate-y-1/2 transition hover:scale-110 hover:z-10"
+              aria-label={ex.name}
+              title={`展品 ${ex.no}`}
+              className="group absolute cursor-pointer rounded-md bg-transparent transition hover:bg-amber-200/15 hover:ring-2 hover:ring-amber-200/70 focus:outline-none"
+              style={{
+                left: `${p.x}%`,
+                top: `${p.y}%`,
+                width: `${p.w}%`,
+                height: `${p.h}%`,
+                transform: "translate(-50%, -50%)",
+              }}
             >
-              <IsoDisplayCase icon={ex.icon} no={ex.no} />
+              <span className="pointer-events-none absolute -top-5 left-1/2 -translate-x-1/2 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-amber-100 opacity-0 transition group-hover:opacity-100">
+                {ex.no} · {ex.name}
+              </span>
             </button>
           );
         })}
+
+        {/* 门锁提示 */}
+        {doorHint && (
+          <div className="pointer-events-none absolute left-1/2 top-[34%] -translate-x-1/2 rounded-full bg-black/70 px-4 py-1.5 text-xs text-amber-100">
+            🔒 门锁着 · 先完成展品时间排序
+          </div>
+        )}
+
+        {/* 调试层 */}
+        {debug && (
+          <div className="pointer-events-none absolute inset-0 z-20">
+            {Array.from({ length: 19 }).map((_, i) => (
+              <div
+                key={`v${i}`}
+                className="absolute top-0 h-full border-l border-cyan-400/40"
+                style={{ left: `${(i + 1) * 5}%` }}
+              />
+            ))}
+            {Array.from({ length: 19 }).map((_, i) => (
+              <div
+                key={`h${i}`}
+                className="absolute left-0 w-full border-t border-cyan-400/40"
+                style={{ top: `${(i + 1) * 5}%` }}
+              />
+            ))}
+            {hotspots.map((p, i) => (
+              <div
+                key={`hs${i}`}
+                className="absolute border-2 border-pink-400/80"
+                style={{
+                  left: `${p.x}%`,
+                  top: `${p.y}%`,
+                  width: `${p.w}%`,
+                  height: `${p.h}%`,
+                  transform: "translate(-50%, -50%)",
+                }}
+              >
+                <span className="absolute -top-4 left-0 bg-pink-500 px-1 text-[10px] text-white">
+                  {i}
+                </span>
+              </div>
+            ))}
+            <div
+              className="absolute border-2 border-yellow-400"
+              style={{
+                left: `${doorSpot.x}%`,
+                top: `${doorSpot.y}%`,
+                width: `${doorSpot.w}%`,
+                height: `${doorSpot.h}%`,
+                transform: "translate(-50%, -50%)",
+              }}
+            />
+            {cursor && (
+              <div className="absolute right-2 top-2 rounded bg-black/70 px-2 py-1 text-[11px] text-cyan-200">
+                x: {cursor.x.toFixed(1)}% · y: {cursor.y.toFixed(1)}%
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* 排序区 */}
       <section className="rounded-2xl border border-border bg-card/80 p-5 backdrop-blur">
         <p className="mb-1 text-sm font-medium text-card-foreground">{puzzlePrompt}</p>
         <p className="mb-4 text-xs text-muted-foreground">
-          支持拖拽；移动端可"点选展品 → 点击卡槽"放置。
+          支持拖拽；移动端可"点选展品 → 点击卡槽"放置。点击展厅中的展柜可查看详情。
         </p>
 
-        {/* 5 个卡槽 + 时间轴 */}
         <div className="relative mb-4 flex items-end justify-between gap-2">
           {slots.map((id, idx) => (
             <Slot
@@ -161,7 +267,6 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
           <span>2026 更晚 →</span>
         </div>
 
-        {/* 待排序池 */}
         <div className="rounded-lg border border-dashed border-border bg-background/50 p-3">
           <p className="mb-2 text-[11px] text-muted-foreground">
             待排序的五件礼物：
