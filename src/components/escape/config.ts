@@ -173,12 +173,24 @@ export const FINALE = {
 export const MAX_WRONG_HINT = 3;
 
 // ===== 房间 2：礼物档案室 =====
+import e1Img from "@/assets/room2/e1.png";
+import e2Img from "@/assets/room2/e2.png";
+import e3Img from "@/assets/room2/e3.png";
+import e4Img from "@/assets/room2/e4.png";
+import e5Img from "@/assets/room2/e5.png";
+import e6Img from "@/assets/room2/e6.png";
+import e7Img from "@/assets/room2/e7.png";
+import e8Img from "@/assets/room2/e8.png";
+import e9Img from "@/assets/room2/e9.png";
+import e10Img from "@/assets/room2/e10.png";
+
 export type Exhibit = {
   id: string; // "e1" ~ "e10"
   no: number;
   name: string;
   icon: string;
   desc: string;
+  image: string;
 };
 
 export const ROOM_2_DATA = {
@@ -191,22 +203,22 @@ export const ROOM_2_DATA = {
       "推开门，是一间小小的私人展览馆。十个展柜沿着墙顺时针绕一圈，每一件都被仔细摆过。",
   },
   exhibits: [
-    { id: "e1", no: 1, name: "AirPods", icon: "🎧", desc: "第一次想着「希望你走路上耳朵里有我挑的歌」。" },
-    { id: "e2", no: 2, name: "宝矿力", icon: "🧴", desc: "你那次发烧到 39 度，我冲了一整箱过去。" },
-    { id: "e3", no: 3, name: "电动牙刷", icon: "🪥", desc: "你说想好好刷牙，我立刻下了单。" },
-    { id: "e4", no: 4, name: "护肤套盒", icon: "🧖‍♀️", desc: "柜姐推荐的那套，说很适合你。" },
-    { id: "e5", no: 5, name: "ON 金标蛋白粉", icon: "🥛", desc: "陪你健身的那阵子，每天一勺。" },
-    { id: "e6", no: 6, name: "斜挎包", icon: "👜", desc: "挑了能塞下笔电的那一款。" },
-    { id: "e7", no: 7, name: "宝格丽大吉岭茶香水", icon: "🌸", desc: "第一次见你之后，我一直记得那股味道。" },
-    { id: "e8", no: 8, name: "乐高法拉利积木", icon: "🏎️", desc: "拼了一个下午，盒子比你人还大。" },
-    { id: "e9", no: 9, name: "lululemon 运动服", icon: "🩱", desc: "想你跑步的时候穿得舒服一点。" },
-    { id: "e10", no: 10, name: "鱼油", icon: "🐟", desc: "希望你别熬夜了，但我知道你会。" },
+    { id: "e1", no: 1, name: "护肤套盒", icon: "🧖‍♀️", desc: "做好皮肤管理。", image: e1Img },
+    { id: "e2", no: 2, name: "宝矿力", icon: "🧴", desc: "好喝小甜水。", image: e2Img },
+    { id: "e3", no: 3, name: "ON 金标蛋白粉", icon: "🥛", desc: "第一次知道这家伙这么贵。", image: e3Img },
+    { id: "e4", no: 4, name: "电动牙刷", icon: "🪥", desc: "不用还给我。", image: e4Img },
+    { id: "e5", no: 5, name: "乐高法拉利", icon: "🏎️", desc: "我也想要。", image: e5Img },
+    { id: "e6", no: 6, name: "Kangol 斜挎包", icon: "👜", desc: "薄荷绿的斜挎包，好久都没有出场了呢……", image: e6Img },
+    { id: "e7", no: 7, name: "lululemon T 恤", icon: "👕", desc: "怎么已经淘汰给爸爸了？", image: e7Img },
+    { id: "e8", no: 8, name: "Seven Seas Omega-3 鱼油", icon: "🐟", desc: "漂洋过海来见你……", image: e8Img },
+    { id: "e9", no: 9, name: "宝格丽大吉岭茶香水", icon: "🌸", desc: "香香的！", image: e9Img },
+    { id: "e10", no: 10, name: "AirPods", icon: "🎧", desc: "保持耳机干净！保持耳道干燥！", image: e10Img },
   ] as Exhibit[],
 
   // 五个需要排序的展品
-  sortablePool: ["e2", "e1", "e7", "e10", "e8"],
+  sortablePool: ["e2", "e10", "e9", "e8", "e5"],
   // 正确的时间顺序（从 2020 → 2026）
-  correctOrder: ["e2", "e1", "e7", "e10", "e8"],
+  correctOrder: ["e2", "e10", "e9", "e8", "e5"],
   slotLabels: ["2020", "2022", "2023", "2025", "2026"],
 
   puzzlePrompt:

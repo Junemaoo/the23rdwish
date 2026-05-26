@@ -135,6 +135,28 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
         />
 
 
+        {/* 10 个展品热区 */}
+        {hotspots.map((p, i) => {
+          const ex = exhibits[i];
+          if (!ex) return null;
+          return (
+            <button
+              key={ex.id}
+              onClick={() => setOpenExhibit(ex)}
+              aria-label={ex.name}
+              title={ex.name}
+              className="absolute cursor-pointer bg-transparent focus:outline-none"
+              style={{
+                left: `${p.x}%`,
+                top: `${p.y}%`,
+                width: `${p.w}%`,
+                height: `${p.h}%`,
+                transform: "translate(-50%, -50%)",
+              }}
+            />
+          );
+        })}
+
         {/* 后门热区 */}
         <button
           onClick={handleDoor}
@@ -149,6 +171,7 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
             transform: "translate(-50%, -50%)",
           }}
         />
+
 
         {/* 布告板 — 覆盖墙上原告示牌，点击弹出排序面板 */}
         <button
@@ -331,9 +354,16 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
         title={openExhibit ? `展品 ${openExhibit.no} · ${openExhibit.name}` : ""}
       >
         <div className="space-y-3">
-          <div className="text-5xl">{openExhibit?.icon}</div>
+          {openExhibit && (
+            <img
+              src={openExhibit.image}
+              alt={openExhibit.name}
+              className="mx-auto h-56 w-auto rounded-lg object-contain"
+            />
+          )}
           <p>{openExhibit?.desc}</p>
         </div>
+
       </Modal>
 
       <Modal open={solved} onClose={onComplete} title="🗂️ 档案归档完成">
