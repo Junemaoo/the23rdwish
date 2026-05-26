@@ -33,7 +33,6 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
     const shuffled = [...sortablePool].sort(() => Math.random() - 0.5).slice(0, 5);
     setPickedFive(shuffled);
     setSlots([null, null, null, null, null]);
-    setPicked(null);
     setErrMsg("");
     setWrong(0);
   }, [sortOpen, sortablePool]);
