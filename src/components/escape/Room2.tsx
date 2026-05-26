@@ -111,8 +111,13 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
 
   function resetSort() {
     setSlots([null, null, null, null, null]);
-    setPicked(null);
     setErrMsg("");
+  }
+
+  function placeIntoNextEmpty(exId: string) {
+    if (inSlots.has(exId)) return;
+    const idx = slots.findIndex((s) => s === null);
+    if (idx >= 0) placeIntoSlot(idx, exId);
   }
 
   function handleDoor() {
