@@ -111,7 +111,7 @@ const ROOM_1: RoomConfig = {
   ],
   successText:
     "门锁咔哒一声打开了。\n原来世界两端的时间，也可以被算进同一个答案里。",
-  nextCta: "进入礼物档案室",
+  nextCta: "进入下一章",
 };
 
 export const ROOMS: RoomConfig[] = [
