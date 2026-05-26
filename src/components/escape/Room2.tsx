@@ -24,9 +24,19 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
 
   const [slots, setSlots] = useState<(string | null)[]>([null, null, null, null, null]);
   const inSlots = useMemo(() => new Set(slots.filter(Boolean) as string[]), [slots]);
-  const pool = sortablePool.filter((id) => !inSlots.has(id));
 
-  const [picked, setPicked] = useState<string | null>(null);
+  const [pickedFive, setPickedFive] = useState<string[]>([]);
+  const pool = pickedFive.filter((id) => !inSlots.has(id));
+
+  useEffect(() => {
+    if (!sortOpen) return;
+    const shuffled = [...sortablePool].sort(() => Math.random() - 0.5).slice(0, 5);
+    setPickedFive(shuffled);
+    setSlots([null, null, null, null, null]);
+    setPicked(null);
+    setErrMsg("");
+    setWrong(0);
+  }, [sortOpen, sortablePool]);
 
   const [debug, setDebug] = useState(false);
   const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
