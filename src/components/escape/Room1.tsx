@@ -56,6 +56,12 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [openClue, showInventory]);
 
+  useEffect(() => {
+    if (!solved) return;
+    const t1 = setTimeout(() => setDoorOpened(true), 60);
+    return () => clearTimeout(t1);
+  }, [solved]);
+
   function handleCollect() {
     if (!openClue || flying) return;
     const imgEl = clueImgRef.current;
