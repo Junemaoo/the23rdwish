@@ -308,13 +308,13 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
           ))}
         </div>
         <div className="mb-4 flex items-center justify-between px-1 text-[10px] text-muted-foreground">
-          <span>← 更早 2020</span>
-          <span>2026 更晚 →</span>
+          <span>← 更早</span>
+          <span>更晚 →</span>
         </div>
 
         <div className="rounded-lg border border-dashed border-border bg-background/50 p-3">
           <p className="mb-2 text-[11px] text-muted-foreground">
-            待排序的五件礼物：
+            待排序的五件礼物（随机抽取）：
           </p>
           <div className="flex flex-wrap gap-2">
             {pool.length === 0 && (
@@ -331,14 +331,13 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
                   draggable
                   onDragStart={(e) => e.dataTransfer.setData("text/plain", id)}
                   onClick={() => setPicked(isPicked ? null : id)}
-                  className={`flex items-center gap-1 rounded-md border-2 px-3 py-2 text-sm shadow-sm transition ${
+                  className={`flex h-12 w-12 items-center justify-center rounded-md border-2 text-lg font-semibold shadow-sm transition ${
                     isPicked
                       ? "border-primary bg-primary/10 scale-105"
                       : "border-border bg-card hover:border-primary/60"
                   }`}
                 >
-                  <span className="text-lg">{ex.icon}</span>
-                  <span className="text-xs">{ex.name}</span>
+                  {ex.no}
                 </button>
               );
             })}
