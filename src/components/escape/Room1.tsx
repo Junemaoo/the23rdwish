@@ -1,15 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BookOpen, X } from "lucide-react";
 import { ROOMS } from "./config";
 import { Modal, AnswerInput } from "./ui";
 import room1Bg from "@/assets/room1-bg.jpg";
 import room1Calendar from "@/assets/room1-calendar.jpg";
-import room1Laptop from "@/assets/room1-laptop.jpg";
-import room1Desktop from "@/assets/room1-desktop.jpg";
+import room1Laptop from "@/assets/room1-laptop.png";
+import room1Desktop from "@/assets/room1-desktop.png";
 
 type ClueSpot = {
   id: string;
-  label: string;
+  title: string;
   image: string;
   left: number;
   top: number;
@@ -17,9 +17,14 @@ type ClueSpot = {
   h: number;
 };
 
-/**
- * 房间 1：沉浸式全屏，热点无视觉提示
- */
+type FlyingClue = {
+  src: string;
+  from: { x: number; y: number; w: number; h: number };
+  to: { x: number; y: number };
+  phase: "start" | "end";
+  id: string;
+};
+
 export function Room1({ onComplete }: { onComplete: () => void }) {
   const config = ROOMS[0];
   const [openClue, setOpenClue] = useState<ClueSpot | null>(null);
@@ -27,14 +32,18 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
   const [solved, setSolved] = useState(false);
   const [collected, setCollected] = useState<Set<string>>(new Set());
   const [showInventory, setShowInventory] = useState(false);
+  const [flying, setFlying] = useState<FlyingClue | null>(null);
+  const [popping, setPopping] = useState(false);
+
+  const inventoryBtnRef = useRef<HTMLButtonElement | null>(null);
+  const clueImgRef = useRef<HTMLImageElement | null>(null);
 
   const hotspots: ClueSpot[] = [
-    { id: "pc-left",  label: "你的笔记本",      image: room1Laptop,   left: 8,  top: 50, w: 14, h: 14 },
-    { id: "calendar", label: "走廊上的日历",    image: room1Calendar, left: 41, top: 27, w: 9,  h: 22 },
-    { id: "pc-right", label: "我的台式机",      image: room1Desktop,  left: 70, top: 26, w: 14, h: 14 },
+    { id: "pc-left",  title: "zcx 的电脑屏幕", image: room1Laptop,   left: 8,  top: 50, w: 14, h: 14 },
+    { id: "calendar", title: "墙上的日历",     image: room1Calendar, left: 41, top: 27, w: 9,  h: 22 },
+    { id: "pc-right", title: "mjm 的电脑屏幕", image: room1Desktop,  left: 70, top: 26, w: 14, h: 14 },
   ];
 
-  // Esc 关闭弹层
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key !== "Escape") return;
@@ -45,13 +54,45 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [openClue, showInventory]);
 
-  function collect(id: string) {
-    setCollected((prev) => {
-      const next = new Set(prev);
-      next.add(id);
-      return next;
-    });
+  function handleCollect() {
+    if (!openClue || flying) return;
+    const imgEl = clueImgRef.current;
+    const btnEl = inventoryBtnRef.current;
+    if (!imgEl || !btnEl) {
+      // fallback：直接收集
+      setCollected((p) => new Set(p).add(openClue.id));
+      setOpenClue(null);
+      return;
+    }
+    const a = imgEl.getBoundingClientRect();
+    const b = btnEl.getBoundingClientRect();
+    const fly: FlyingClue = {
+      id: openClue.id,
+      src: openClue.image,
+      from: { x: a.left, y: a.top, w: a.width, h: a.height },
+      to: { x: b.left + b.width / 2, y: b.top + b.height / 2 },
+      phase: "start",
+    };
+    const collectedId = openClue.id;
+    setFlying(fly);
     setOpenClue(null);
+
+    // 触发 transition
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setFlying((f) => (f ? { ...f, phase: "end" } : f));
+      });
+    });
+
+    // 中段：图标弹一下 + 写入 collected
+    window.setTimeout(() => {
+      setCollected((p) => new Set(p).add(collectedId));
+      setPopping(true);
+      window.setTimeout(() => setPopping(false), 500);
+    }, 620);
+
+    // 动画结束清理
+    window.setTimeout(() => setFlying(null), 760);
   }
 
   return (
@@ -63,10 +104,11 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
         draggable={false}
       />
 
-      {/* 左上角：线索收集册入口 */}
+      {/* 左上角：线索收集册 */}
       <button
+        ref={inventoryBtnRef}
         onClick={() => setShowInventory(true)}
-        className="absolute left-4 top-4 z-20 flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white shadow-lg backdrop-blur transition hover:bg-black/80"
+        className={`absolute left-4 top-4 z-30 flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white shadow-lg backdrop-blur transition hover:bg-black/80 ${popping ? "animate-clue-pop" : ""}`}
         title="线索收集册"
         aria-label="线索收集册"
       >
@@ -87,11 +129,11 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
             width: `${h.w}%`,
             height: `${h.h}%`,
           }}
-          aria-label={h.label}
+          aria-label={h.title}
         />
       ))}
 
-      {/* 密码锁热点 → 打开答题框 */}
+      {/* 密码锁 */}
       <button
         onClick={() => setShowAnswer(true)}
         className="absolute cursor-pointer bg-transparent"
@@ -100,10 +142,10 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
         aria-label="数字密码锁"
       />
 
-      {/* 物件特写：纯图 + 收集线索 */}
+      {/* 线索卡片 */}
       {openClue && (
         <div
-          className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-black/85 px-4 animate-in fade-in"
+          className="fixed inset-0 z-40 flex items-center justify-center bg-black/85 px-4 animate-in fade-in"
           onClick={() => setOpenClue(null)}
         >
           <button
@@ -113,25 +155,53 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
           >
             <X className="h-5 w-5" />
           </button>
-          <img
-            src={openClue.image}
-            alt=""
+          <div
             onClick={(e) => e.stopPropagation()}
-            className="max-h-[75vh] w-auto max-w-2xl rounded-2xl shadow-2xl"
-            draggable={false}
-          />
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              if (!collected.has(openClue.id)) collect(openClue.id);
-              else setOpenClue(null);
-            }}
-            disabled={collected.has(openClue.id)}
-            className="mt-6 rounded-full bg-primary px-8 py-2.5 text-sm font-medium text-primary-foreground shadow-lg transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex w-full max-w-sm flex-col items-center gap-5 rounded-3xl bg-[#f5ede0] px-6 py-7 shadow-2xl"
           >
-            {collected.has(openClue.id) ? "已收集 ✓" : "收集线索"}
-          </button>
+            <h3 className="text-center text-2xl font-semibold text-[#1a1a1a]">
+              {openClue.title}
+            </h3>
+            <div className="flex w-full items-center justify-center">
+              <img
+                ref={clueImgRef}
+                src={openClue.image}
+                alt=""
+                draggable={false}
+                className="h-auto w-[75%] select-none object-contain"
+              />
+            </div>
+            <button
+              onClick={handleCollect}
+              disabled={collected.has(openClue.id)}
+              className="w-[70%] rounded-full bg-[#c97259] px-6 py-3 text-base font-medium text-white shadow-md transition hover:bg-[#b9614b] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {collected.has(openClue.id) ? "已收集 ✓" : "收集线索"}
+            </button>
+          </div>
         </div>
+      )}
+
+      {/* 飞行动画图层 */}
+      {flying && (
+        <img
+          src={flying.src}
+          alt=""
+          draggable={false}
+          className="pointer-events-none fixed z-50 object-contain"
+          style={{
+            left: 0,
+            top: 0,
+            width: flying.from.w,
+            height: flying.from.h,
+            transform:
+              flying.phase === "start"
+                ? `translate(${flying.from.x}px, ${flying.from.y}px) scale(1)`
+                : `translate(${flying.to.x - flying.from.w / 2}px, ${flying.to.y - flying.from.h / 2}px) scale(0.12)`,
+            opacity: flying.phase === "start" ? 1 : 0.2,
+            transition: "transform 700ms cubic-bezier(.4,0,.2,1), opacity 700ms ease-out",
+          }}
+        />
       )}
 
       {/* 线索收集册 */}
@@ -160,22 +230,22 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
                 return (
                   <div
                     key={h.id}
-                    className="flex flex-col items-center gap-2 rounded-xl border border-white/10 bg-black/40 p-3"
+                    className="flex flex-col items-center gap-2 rounded-xl border border-white/10 bg-[#f5ede0]/95 p-3"
                   >
-                    <div className="flex aspect-square w-full items-center justify-center overflow-hidden rounded-lg bg-black">
+                    <div className="flex aspect-square w-full items-center justify-center overflow-hidden rounded-lg bg-[#f5ede0]">
                       {got ? (
                         <img
                           src={h.image}
                           alt=""
-                          className="h-full w-full object-cover"
+                          className="h-full w-full object-contain"
                           draggable={false}
                         />
                       ) : (
-                        <span className="text-3xl text-white/30">?</span>
+                        <span className="text-3xl text-black/30">?</span>
                       )}
                     </div>
-                    <span className={`text-xs ${got ? "text-white/90" : "text-white/40"}`}>
-                      {got ? h.label : "尚未发现"}
+                    <span className={`text-center text-xs ${got ? "text-[#1a1a1a]" : "text-black/40"}`}>
+                      {got ? h.title : "尚未发现"}
                     </span>
                   </div>
                 );
