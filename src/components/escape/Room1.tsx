@@ -49,6 +49,7 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      if (e.key === "d" || e.key === "D") setDebug((v) => !v);
       if (e.key !== "Escape") return;
       if (openClue) setOpenClue(null);
       else if (showInventory) setShowInventory(false);
