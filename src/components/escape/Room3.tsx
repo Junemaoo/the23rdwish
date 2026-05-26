@@ -9,12 +9,12 @@ type Spot = { x: number; y: number; w: number; aspect: number };
 
 /** 热点坐标（基于 scene.png 实际位置，可微调） */
 const DEFAULT_SPOTS: Record<string, Spot> = {
-  noodles: { x: 12, y: 80, w: 22, aspect: 1 },
-  popmart: { x: 25, y: 78, w: 11, aspect: 1 },
-  ticket: { x: 45, y: 75, w: 14, aspect: 1 },
-  coffee: { x: 56, y: 67, w: 11, aspect: 1 },
-  map: { x: 80, y: 72, w: 24, aspect: 1 },
-  bottle: { x: 65, y: 18, w: 8, aspect: 1 / 1.6 },
+  noodles: { x: 37.8, y: 46.4, w: 26.5, aspect: 1 },
+  popmart: { x: 27.4, y: 73.9, w: 11.0, aspect: 1 },
+  ticket: { x: 42.9, y: 73.8, w: 14.0, aspect: 1 },
+  coffee: { x: 59.2, y: 64.6, w: 11.0, aspect: 1 },
+  map: { x: 72.0, y: 72.0, w: 14.9, aspect: 1 },
+  bottle: { x: 65.0, y: 18.0, w: 8.0, aspect: 1 / 1.6 },
 };
 
 const DOOR_BTN_POS = { x: 40, y: 19 };
