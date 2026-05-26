@@ -298,7 +298,9 @@ function FragmentBox({
           return (
             <div
               key={i}
-              ref={(el) => (slotRefs.current[i] = el)}
+              ref={(el) => {
+                slotRefs.current[i] = el;
+              }}
               className={`flex h-8 w-8 items-center justify-center rounded-md border text-base font-serif ${
                 ch
                   ? "animate-in zoom-in border-amber-400 bg-amber-50 text-amber-900 shadow-sm"
