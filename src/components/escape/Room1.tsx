@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { BookOpen, X } from "lucide-react";
+import { BookOpen, X, Delete, Check } from "lucide-react";
 import { ROOMS } from "./config";
-import { Modal, AnswerInput } from "./ui";
+import { Modal } from "./ui";
+
 import room1Bg from "@/assets/room1-bg.jpg";
 import room1Calendar from "@/assets/room1-calendar.jpg";
 import room1Laptop from "@/assets/room1-laptop.png";
