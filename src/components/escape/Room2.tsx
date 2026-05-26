@@ -22,7 +22,6 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
   const [wrong, setWrong] = useState(0);
   
 
-  const [picked, setPicked] = useState<string | null>(null);
   const [slots, setSlots] = useState<(string | null)[]>([null, null, null, null, null]);
   const inSlots = useMemo(() => new Set(slots.filter(Boolean) as string[]), [slots]);
 
@@ -34,7 +33,6 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
     const shuffled = [...sortablePool].sort(() => Math.random() - 0.5).slice(0, 5);
     setPickedFive(shuffled);
     setSlots([null, null, null, null, null]);
-    setPicked(null);
     setErrMsg("");
     setWrong(0);
   }, [sortOpen, sortablePool]);
@@ -81,7 +79,6 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
     if (prev >= 0) next[prev] = null;
     next[slotIdx] = exId;
     setSlots(next);
-    setPicked(null);
     setErrMsg("");
   }
 
@@ -114,8 +111,13 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
 
   function resetSort() {
     setSlots([null, null, null, null, null]);
-    setPicked(null);
     setErrMsg("");
+  }
+
+  function placeIntoNextEmpty(exId: string) {
+    if (inSlots.has(exId)) return;
+    const idx = slots.findIndex((s) => s === null);
+    if (idx >= 0) placeIntoSlot(idx, exId);
   }
 
   function handleDoor() {
@@ -285,13 +287,18 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
       </div>
 
       {/* 排序面板 — 由布告板触发的弹窗 */}
-      <Modal open={sortOpen} onClose={() => setSortOpen(false)} title="🗂️ 展品时间排序">
+      <Modal
+        open={sortOpen}
+        onClose={() => setSortOpen(false)}
+        title="🗂️ 展品时间排序"
+        hideClose
+      >
         <div>
 
 
         <p className="mb-1 text-sm font-medium text-card-foreground">{puzzlePrompt}</p>
         <p className="mb-4 text-xs text-muted-foreground">
-          支持拖拽；移动端可"点选展品 → 点击卡槽"放置。点击展厅中的展柜可查看详情。
+          按顺序点击下方礼物会自动放入第一个空槽，也支持拖拽。点击已占用的卡槽可取回。
         </p>
 
         <div className="relative mb-4 flex items-end justify-between gap-2">
@@ -301,9 +308,7 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
               label={slotLabels[idx]}
               exhibit={id ? exhibitMap.get(id)! : null}
               onDropExhibit={(exId) => placeIntoSlot(idx, exId)}
-              onClickEmpty={() => picked && placeIntoSlot(idx, picked)}
               onClickFilled={() => removeFromSlot(idx)}
-              isTarget={picked !== null}
             />
           ))}
         </div>
@@ -324,18 +329,13 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
             )}
             {pool.map((id) => {
               const ex = exhibitMap.get(id)!;
-              const isPicked = picked === id;
               return (
                 <button
                   key={id}
                   draggable
                   onDragStart={(e) => e.dataTransfer.setData("text/plain", id)}
-                  onClick={() => setPicked(isPicked ? null : id)}
-                  className={`flex h-12 w-12 items-center justify-center rounded-md border-2 text-lg font-semibold shadow-sm transition ${
-                    isPicked
-                      ? "border-primary bg-primary/10 scale-105"
-                      : "border-border bg-card hover:border-primary/60"
-                  }`}
+                  onClick={() => placeIntoNextEmpty(id)}
+                  className="flex h-12 w-12 items-center justify-center rounded-md border-2 border-border bg-card text-lg font-semibold shadow-sm transition hover:border-primary/60"
                 >
                   {ex.no}
                 </button>
@@ -412,16 +412,12 @@ function Slot({
   label,
   exhibit,
   onDropExhibit,
-  onClickEmpty,
   onClickFilled,
-  isTarget,
 }: {
   label: string;
   exhibit: Exhibit | null;
   onDropExhibit: (id: string) => void;
-  onClickEmpty: () => void;
   onClickFilled: () => void;
-  isTarget: boolean;
 }) {
   const [over, setOver] = useState(false);
   return (
@@ -438,15 +434,15 @@ function Slot({
           const id = e.dataTransfer.getData("text/plain");
           if (id) onDropExhibit(id);
         }}
-        onClick={() => (exhibit ? onClickFilled() : onClickEmpty())}
-        className={`flex h-20 w-full min-w-0 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition ${
-          over || (isTarget && !exhibit)
+        onClick={() => exhibit && onClickFilled()}
+        className={`flex h-20 w-full min-w-0 flex-col items-center justify-center rounded-lg border-2 border-dashed transition ${
+          over
             ? "border-primary bg-primary/10"
             : exhibit
-              ? "border-primary bg-card"
+              ? "cursor-pointer border-primary bg-card"
               : "border-border bg-background/40"
         }`}
-        title={exhibit ? "点击移回" : "拖拽或点击放入"}
+        title={exhibit ? "点击取回" : "拖拽放入，或点击下方礼物自动放入"}
       >
         {exhibit ? (
           <span className="text-2xl font-semibold text-card-foreground">
