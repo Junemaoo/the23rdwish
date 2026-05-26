@@ -131,11 +131,11 @@ export function Finale({ onRestart }: { onRestart: () => void }) {
                 : "opacity-100 animate-in fade-in slide-in-from-bottom-4 duration-700"
             }`}
           >
-            <div className="relative mx-auto max-w-md">
+            <div className="relative mx-auto w-full max-w-[min(95vw,1100px)]">
               <img
                 src={letterImg}
                 alt="生日信"
-                className="mx-auto w-full rounded-[18px] shadow-[0_24px_60px_-20px_rgba(120,80,50,0.55)]"
+                className="mx-auto w-full rounded-[18px] shadow-[0_30px_80px_-20px_rgba(120,80,50,0.55)]"
               />
             </div>
 
