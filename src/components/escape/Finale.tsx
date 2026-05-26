@@ -168,7 +168,7 @@ export function Finale({ onRestart }: { onRestart: () => void }) {
               <img
                 src={cakeImg}
                 alt="生日蛋糕"
-                className="relative w-72 drop-shadow-[0_20px_30px_rgba(180,140,90,0.35)] md:w-80"
+                className="relative w-full max-w-[min(95vw,1100px)] drop-shadow-[0_30px_50px_rgba(180,140,90,0.35)]"
               />
             </div>
             <p className="text-sm text-[#8A6A5C]">请打开冰箱完成许愿吧！</p>
