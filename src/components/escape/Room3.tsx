@@ -47,23 +47,10 @@ export function Room3({ onComplete }: { onComplete: () => void }) {
       <img
         src={sceneImg}
         alt="未来的一日行程单 · 桌面场景"
-        className="absolute inset-0 h-full w-full object-cover"
+        className="absolute inset-0 h-full w-full object-contain"
       />
-      {/* 轻暗角，提升热点对比 */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(0,0,0,0.25)_100%)]" />
 
-      {/* 左上角标题浮层 */}
-      <div className="absolute left-3 top-3 z-10 rounded-xl border border-white/40 bg-white/70 px-3 py-2 text-left shadow-lg backdrop-blur">
-        <p className="text-[10px] tracking-[0.3em] text-muted-foreground">
-          房间 {meta.index} / {meta.total}
-        </p>
-        <h2 className="font-serif text-lg text-foreground">《{meta.name}》</h2>
-        <p className="mt-0.5 text-[11px] text-muted-foreground">
-          碎片 {collected.length} / {fragmentOrder.length}
-        </p>
-      </div>
-
-      {/* 5 个物件热点 */}
+      {/* 5 个物件热点（透明） */}
       {items.map((it) => {
         const spot = HOTSPOTS[it.id];
         if (!spot) return null;
@@ -78,45 +65,42 @@ export function Room3({ onComplete }: { onComplete: () => void }) {
               width: `${spot.w}%`,
               aspectRatio: "1 / 1",
             }}
-            className="group absolute -translate-x-1/2 -translate-y-1/2"
+            className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer"
             title={it.label}
+            aria-label={it.label}
           >
-            {!done && (
-              <>
-                <span className="pointer-events-none absolute inset-0 animate-ping rounded-full border-2 border-amber-300/80" />
-                <span className="pointer-events-none absolute inset-2 rounded-full ring-2 ring-amber-300/70 shadow-[0_0_18px_4px_rgba(252,211,77,0.55)]" />
-              </>
-            )}
             {done && (
               <span className="absolute left-1/2 top-1/2 flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-emerald-500 text-xs text-white shadow-lg">
                 ✓
               </span>
             )}
-            <span className="pointer-events-none absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-[#3E2F2A]/85 px-1.5 py-0.5 text-[10px] text-white opacity-0 transition group-hover:opacity-100">
-              {it.label}
-            </span>
           </button>
         );
       })}
 
-      {/* 许愿瓶（柜子上） */}
-      <div
+      {/* 许愿瓶热点（柜子上） */}
+      <button
+        onClick={() => {
+          if (allCollected) setShowSuccess(true);
+        }}
         style={{
           left: `${BOTTLE_POS.x}%`,
           top: `${BOTTLE_POS.y}%`,
           width: `${BOTTLE_POS.w}%`,
           aspectRatio: "1 / 2",
         }}
-        className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
+        className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer"
         title={allCollected ? "许愿瓶被点亮了" : `还差 ${fragmentOrder.length - collected.length} 片`}
+        aria-label="许愿瓶"
       >
         {allCollected && (
           <>
-            <span className="absolute inset-0 animate-pulse rounded-full bg-amber-300/40 blur-2xl" />
-            <span className="absolute inset-0 rounded-full shadow-[0_0_40px_12px_rgba(252,211,77,0.75)]" />
+            <span className="pointer-events-none absolute inset-0 animate-pulse rounded-full bg-amber-300/40 blur-2xl" />
+            <span className="pointer-events-none absolute inset-0 rounded-full shadow-[0_0_40px_12px_rgba(252,211,77,0.75)]" />
           </>
         )}
-      </div>
+      </button>
+
 
       {/* 集齐后：门上发光按钮"进入下一关" */}
       {allCollected && (
