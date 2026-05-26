@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { ROOM_2_DATA, type Exhibit } from "./config";
 import { Modal } from "./ui";
 import room2Bg from "@/assets/room2-hall.png";
