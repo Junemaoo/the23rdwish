@@ -412,16 +412,12 @@ function Slot({
   label,
   exhibit,
   onDropExhibit,
-  onClickEmpty,
   onClickFilled,
-  isTarget,
 }: {
   label: string;
   exhibit: Exhibit | null;
   onDropExhibit: (id: string) => void;
-  onClickEmpty: () => void;
   onClickFilled: () => void;
-  isTarget: boolean;
 }) {
   const [over, setOver] = useState(false);
   return (
@@ -438,15 +434,15 @@ function Slot({
           const id = e.dataTransfer.getData("text/plain");
           if (id) onDropExhibit(id);
         }}
-        onClick={() => (exhibit ? onClickFilled() : onClickEmpty())}
-        className={`flex h-20 w-full min-w-0 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition ${
-          over || (isTarget && !exhibit)
+        onClick={() => exhibit && onClickFilled()}
+        className={`flex h-20 w-full min-w-0 flex-col items-center justify-center rounded-lg border-2 border-dashed transition ${
+          over
             ? "border-primary bg-primary/10"
             : exhibit
-              ? "border-primary bg-card"
+              ? "cursor-pointer border-primary bg-card"
               : "border-border bg-background/40"
         }`}
-        title={exhibit ? "点击移回" : "拖拽或点击放入"}
+        title={exhibit ? "点击取回" : "拖拽放入，或点击下方礼物自动放入"}
       >
         {exhibit ? (
           <span className="text-2xl font-semibold text-card-foreground">
