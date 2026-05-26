@@ -19,7 +19,7 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
   const [solved, setSolved] = useState(false);
   const [errMsg, setErrMsg] = useState("");
   const [wrong, setWrong] = useState(0);
-  const [doorHint, setDoorHint] = useState(false);
+  
 
   const [slots, setSlots] = useState<(string | null)[]>([null, null, null, null, null]);
   const inSlots = useMemo(() => new Set(slots.filter(Boolean) as string[]), [slots]);
@@ -103,12 +103,7 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
   }
 
   function handleDoor() {
-    if (solved) {
-      onComplete();
-    } else {
-      setDoorHint(true);
-      window.setTimeout(() => setDoorHint(false), 1800);
-    }
+    if (solved) onComplete();
   }
 
   return (
@@ -196,12 +191,6 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
         </button>
 
 
-        {/* 门锁提示 */}
-        {doorHint && (
-          <div className="pointer-events-none absolute left-1/2 top-[34%] -translate-x-1/2 rounded-full bg-black/70 px-4 py-1.5 text-xs text-amber-100">
-            🔒 门锁着 · 先点击门旁的布告板完成展品排序
-          </div>
-        )}
 
         {/* 调试层 */}
         {debug && (
