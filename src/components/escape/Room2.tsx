@@ -159,21 +159,21 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
           }}
         />
 
-        {/* 布告板 — 点击弹出排序面板 */}
+        {/* 布告板 — 覆盖墙上原告示牌，点击弹出排序面板 */}
         <button
           onClick={() => setSortOpen(true)}
           aria-label="展品排序布告板"
           title="展品排序"
           className="group absolute focus:outline-none"
           style={{
-            left: "60%",
-            top: "20%",
-            width: "8%",
-            height: "14%",
+            left: "66%",
+            top: "28%",
+            width: "15%",
+            height: "22%",
             transform: "translate(-50%, -50%)",
           }}
         >
-          <svg viewBox="0 0 100 110" className="h-full w-full drop-shadow-[0_4px_6px_rgba(0,0,0,0.4)] transition group-hover:scale-105">
+          <svg viewBox="0 0 100 110" preserveAspectRatio="xMidYMid meet" className="h-full w-full drop-shadow-[0_4px_6px_rgba(0,0,0,0.4)] transition group-hover:scale-105">
             {/* 绳子 */}
             <line x1="50" y1="8" x2="20" y2="40" stroke="#3b2a20" strokeWidth="1.2" />
             <line x1="50" y1="8" x2="80" y2="40" stroke="#3b2a20" strokeWidth="1.2" />
@@ -195,35 +195,10 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
             ))}
           </svg>
           <span className="pointer-events-none absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black/70 px-1.5 py-0.5 text-[10px] text-amber-100 opacity-0 transition group-hover:opacity-100">
-            展品排序
+            点击查看展品排序
           </span>
         </button>
 
-        {/* 10 个展柜热区 */}
-        {exhibits.map((ex, i) => {
-          const p = hotspots[i];
-          if (!p) return null;
-          return (
-            <button
-              key={ex.id}
-              onClick={() => setOpenExhibit(ex)}
-              aria-label={ex.name}
-              title={`展品 ${ex.no}`}
-              className="group absolute cursor-pointer rounded-md bg-transparent transition hover:bg-amber-200/15 hover:ring-2 hover:ring-amber-200/70 focus:outline-none"
-              style={{
-                left: `${p.x}%`,
-                top: `${p.y}%`,
-                width: `${p.w}%`,
-                height: `${p.h}%`,
-                transform: "translate(-50%, -50%)",
-              }}
-            >
-              <span className="pointer-events-none absolute -top-5 left-1/2 -translate-x-1/2 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-amber-100 opacity-0 transition group-hover:opacity-100">
-                {ex.no} · {ex.name}
-              </span>
-            </button>
-          );
-        })}
 
         {/* 门锁提示 */}
         {doorHint && (
