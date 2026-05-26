@@ -141,7 +141,7 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
           src={room2Bg}
           alt="礼物档案室"
           draggable={false}
-          className="absolute inset-0 h-full w-full select-none object-cover"
+          className="absolute inset-0 h-full w-full select-none object-contain"
         />
 
         {/* 后门热区 */}
