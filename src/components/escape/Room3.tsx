@@ -7,11 +7,11 @@ const norm = (s: string) => s.replace(/\s+/g, "").toLowerCase();
 
 /** 热点坐标（基于 scene.png 实际位置，可微调） */
 const HOTSPOTS: Record<string, { x: number; y: number; w: number }> = {
-  noodles: { x: 38, y: 62, w: 14 },
+  noodles: { x: 12, y: 80, w: 22 },
   popmart: { x: 25, y: 78, w: 11 },
   ticket: { x: 45, y: 75, w: 14 },
   coffee: { x: 56, y: 67, w: 11 },
-  map: { x: 73, y: 78, w: 14 },
+  map: { x: 80, y: 72, w: 24 },
 };
 
 const BOTTLE_POS = { x: 65, y: 18, w: 8 };
@@ -137,7 +137,7 @@ export function Room3({ onComplete }: { onComplete: () => void }) {
       </Modal>
 
       {/* 未集齐时点瓶子的提示 */}
-      <Modal open={bottleNudge} onClose={() => setBottleNudge(false)} title="许愿瓶还暗着">
+      <Modal open={bottleNudge} onClose={() => setBottleNudge(false)} title="许愿瓶未点亮">
         {`还差 ${fragmentOrder.length - collected.length} 片碎片，先去桌上找找～`}
       </Modal>
     </div>

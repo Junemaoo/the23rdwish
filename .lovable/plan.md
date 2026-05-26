@@ -1,15 +1,21 @@
 ## 改动
-位置已确认，把瓶子按钮的临时金色描边去掉。
 
-### `src/components/escape/Room3.tsx`
-把瓶子 button 的 className 从：
-```
-absolute z-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full ring-1 ring-amber-300/40 hover:ring-amber-300/80
-```
-改回：
-```
-absolute z-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer
-```
+### 1. 文案修改 `src/components/escape/Room3.tsx`
+
+未集齐时点击许愿瓶的弹窗标题：
+
+- `"许愿瓶还暗着"` → `"许愿瓶未点亮"`
+
+### 2. 两个圆碗热点扩大 `src/components/escape/Room3.tsx`
+
+把左边汤面碗、右边拌面碗的热点放大覆盖整个碗体（共四个碗）。热点是矩形（`aspect-ratio: 1/1`），所以用更大的 `w` 并下移 `y`：
+
+- `noodles`（左侧汤面碗）：`{x:38, y:62, w:14}` → `{x:12, y:80, w:22}`
+- `map`（右侧拌面碗）：`{x:73, y:78, w:14}` → `{x:80, y:72, w:24}`
+
+其它三个热点（popmart / ticket / coffee）以及许愿瓶坐标不动。
 
 ## 范围之外
-其他逻辑、坐标、文案都不动。
+
+- 不改答题逻辑、碎片配置、其它房间。
+- 不动许愿瓶/门按钮位置。
