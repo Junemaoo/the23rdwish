@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ROOM_3_DATA, type Room3Item } from "./config";
 import { Modal } from "./ui";
 import sceneImg from "@/assets/room3/scene.png";
@@ -17,8 +18,27 @@ const SPOTS: Record<string, { x: number; y: number; w: number; aspect: number }>
 
 const DOOR_BTN_POS = { x: 40, y: 19 };
 
+const FRAGMENT_POOL = ["生", "日", "快", "乐", "呀"];
+function shuffleFragments() {
+  const arr = [...FRAGMENT_POOL];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+type FlyState = {
+  ch: string;
+  from: { x: number; y: number; w: number; h: number };
+  to: { x: number; y: number; w: number; h: number };
+} | null;
+
 export function Room3({ onComplete }: { onComplete: () => void }) {
   const { meta, items, fragmentOrder } = ROOM_3_DATA;
+
+  // 本轮乱序碎片队列（一次性生成，玩家答对一题就按顺序取一个）
+  const [shuffledFragments] = useState<string[]>(() => shuffleFragments());
 
   const [openItem, setOpenItem] = useState<Room3Item | null>(null);
   const [solvedItems, setSolvedItems] = useState<Set<string>>(new Set());
@@ -27,13 +47,46 @@ export function Room3({ onComplete }: { onComplete: () => void }) {
   const [showSort, setShowSort] = useState(false);
   const [bottleLit, setBottleLit] = useState(false);
 
+  // 飞行碎片动效
+  const [flying, setFlying] = useState<FlyState>(null);
+  const [flyPhase, setFlyPhase] = useState<"start" | "end">("start");
+  const [boxBounce, setBoxBounce] = useState(false);
+
+  // 用于测量目标位置（左上角碎片盒下一个空槽）
+  const slotRefs = useRef<(HTMLDivElement | null)[]>([]);
+
   const allCollected = collected.length === fragmentOrder.length;
 
-  function onItemSolved(item: Room3Item) {
-    if (solvedItems.has(item.id)) return;
-    const next = new Set(solvedItems).add(item.id);
-    setSolvedItems(next);
-    setCollected((prev) => [...prev, item.fragment]);
+  /** 玩家点 "知道了"：测量起点，开始飞行动画 */
+  function handleAcknowledge(fromRect: DOMRect) {
+    const ch = shuffledFragments[collected.length];
+    if (!ch) return;
+    const targetEl = slotRefs.current[collected.length];
+    const toRect = targetEl?.getBoundingClientRect();
+    if (!toRect) {
+      // 退化：直接加入
+      setCollected((p) => [...p, ch]);
+      setOpenItem(null);
+      return;
+    }
+    setOpenItem(null); // 关闭卡片
+    setFlying({
+      ch,
+      from: { x: fromRect.left, y: fromRect.top, w: fromRect.width, h: fromRect.height },
+      to: { x: toRect.left, y: toRect.top, w: toRect.width, h: toRect.height },
+    });
+    setFlyPhase("start");
+    // 下一帧切换到终点位置，触发 transition
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => setFlyPhase("end"));
+    });
+    // 动画结束后加入收集区
+    window.setTimeout(() => {
+      setCollected((prev) => [...prev, ch]);
+      setFlying(null);
+      setBoxBounce(true);
+      window.setTimeout(() => setBoxBounce(false), 400);
+    }, 750);
   }
 
   function onBottleClick() {
@@ -51,7 +104,12 @@ export function Room3({ onComplete }: { onComplete: () => void }) {
       style={{ height: "calc(100vh - 49px)" }}
     >
       {/* 左上角碎片收集盒 */}
-      <FragmentBox collected={collected} total={fragmentOrder.length} />
+      <FragmentBox
+        collected={collected}
+        total={fragmentOrder.length}
+        slotRefs={slotRefs}
+        bounce={boxBounce}
+      />
 
       {/* 内层 stage */}
       <div className="relative h-full" style={{ aspectRatio: "1449 / 1086" }}>
@@ -62,7 +120,6 @@ export function Room3({ onComplete }: { onComplete: () => void }) {
           draggable={false}
         />
 
-        {/* 5 个物件热点 */}
         {items.map((it) => {
           const spot = SPOTS[it.id];
           if (!spot) return null;
@@ -89,7 +146,6 @@ export function Room3({ onComplete }: { onComplete: () => void }) {
           );
         })}
 
-        {/* 许愿瓶热点 */}
         <div
           onClick={onBottleClick}
           style={{
@@ -136,7 +192,6 @@ export function Room3({ onComplete }: { onComplete: () => void }) {
           )}
         </div>
 
-        {/* 集齐但未点亮：瓶上方小字提示 */}
         {allCollected && !bottleLit && (
           <div
             style={{ left: `${SPOTS.bottle.x}%`, top: `${SPOTS.bottle.y - 10}%` }}
@@ -146,7 +201,6 @@ export function Room3({ onComplete }: { onComplete: () => void }) {
           </div>
         )}
 
-        {/* 门按钮：点亮后才出现 */}
         {bottleLit && (
           <button
             onClick={onComplete}
@@ -161,8 +215,14 @@ export function Room3({ onComplete }: { onComplete: () => void }) {
       <ItemModal
         item={openItem}
         alreadyDone={openItem ? solvedItems.has(openItem.id) : false}
+        nextFragment={shuffledFragments[collected.length]}
         onClose={() => setOpenItem(null)}
-        onCorrect={(it) => onItemSolved(it)}
+        onSolved={(it) => {
+          if (!solvedItems.has(it.id)) {
+            setSolvedItems((prev) => new Set(prev).add(it.id));
+          }
+        }}
+        onAcknowledge={handleAcknowledge}
       />
 
       <Modal open={bottleNudge} onClose={() => setBottleNudge(false)} title="许愿瓶未点亮">
@@ -181,14 +241,50 @@ export function Room3({ onComplete }: { onComplete: () => void }) {
           setShowSort(false);
         }}
       />
+
+      {/* 飞行中的碎片 */}
+      {flying &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            className="pointer-events-none fixed z-[200] flex items-center justify-center rounded-lg border-2 border-amber-400 bg-amber-50 font-serif text-amber-900 shadow-[0_0_24px_6px_rgba(252,211,77,0.65)]"
+            style={{
+              left: flyPhase === "start" ? flying.from.x : flying.to.x,
+              top: flyPhase === "start" ? flying.from.y : flying.to.y,
+              width: flyPhase === "start" ? flying.from.w : flying.to.w,
+              height: flyPhase === "start" ? flying.from.h : flying.to.h,
+              fontSize: flyPhase === "start" ? 32 : 16,
+              transform: flyPhase === "start" ? "rotate(0deg)" : "rotate(360deg)",
+              transition:
+                "left 0.75s cubic-bezier(0.4,0,0.2,1), top 0.75s cubic-bezier(0.4,0,0.2,1), width 0.75s, height 0.75s, font-size 0.75s, transform 0.75s",
+            }}
+          >
+            {flying.ch}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
 
 /** 左上角碎片收集盒 */
-function FragmentBox({ collected, total }: { collected: string[]; total: number }) {
+function FragmentBox({
+  collected,
+  total,
+  slotRefs,
+  bounce,
+}: {
+  collected: string[];
+  total: number;
+  slotRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
+  bounce: boolean;
+}) {
   return (
-    <div className="absolute left-3 top-3 z-30 rounded-xl border border-amber-200/60 bg-white/75 px-3 py-2 shadow-lg backdrop-blur">
+    <div
+      className={`absolute left-3 top-3 z-30 rounded-xl border border-amber-200/60 bg-white/75 px-3 py-2 shadow-lg backdrop-blur transition-transform ${
+        bounce ? "scale-110" : "scale-100"
+      }`}
+    >
       <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-amber-900">
         <span>🧩</span>
         <span>愿望碎片</span>
@@ -202,6 +298,9 @@ function FragmentBox({ collected, total }: { collected: string[]; total: number 
           return (
             <div
               key={i}
+              ref={(el) => {
+                slotRefs.current[i] = el;
+              }}
               className={`flex h-8 w-8 items-center justify-center rounded-md border text-base font-serif ${
                 ch
                   ? "animate-in zoom-in border-amber-400 bg-amber-50 text-amber-900 shadow-sm"
@@ -221,33 +320,33 @@ function FragmentBox({ collected, total }: { collected: string[]; total: number 
 function ItemModal({
   item,
   alreadyDone,
+  nextFragment,
   onClose,
-  onCorrect,
+  onSolved,
+  onAcknowledge,
 }: {
   item: Room3Item | null;
   alreadyDone: boolean;
+  nextFragment: string | undefined;
   onClose: () => void;
-  onCorrect: (it: Room3Item) => void;
+  onSolved: (it: Room3Item) => void;
+  onAcknowledge: (fromRect: DOMRect) => void;
 }) {
   const [values, setValues] = useState<string[]>([]);
   const [wrong, setWrong] = useState(0);
   const [msg, setMsg] = useState("");
-  const [justSolved, setJustSolved] = useState(false);
+  const [solved, setSolved] = useState(false);
+  const [awardedFragment, setAwardedFragment] = useState<string | null>(null);
+  const fragmentRef = useRef<HTMLDivElement | null>(null);
 
   const key = item?.id ?? "none";
   useEffect(() => {
     setValues(item ? item.fields.map(() => "") : []);
     setWrong(0);
     setMsg("");
-    setJustSolved(false);
+    setSolved(false);
+    setAwardedFragment(null);
   }, [key]);
-
-  // 答对后短暂展示 ✓，然后自动关闭
-  useEffect(() => {
-    if (!justSolved) return;
-    const t = setTimeout(() => onClose(), 900);
-    return () => clearTimeout(t);
-  }, [justSolved, onClose]);
 
   if (!item) return null;
 
@@ -257,9 +356,10 @@ function ItemModal({
       item.answers[i].some((a) => norm(a) === norm(values[i] ?? "")),
     );
     if (ok) {
-      setJustSolved(true);
+      setSolved(true);
       setMsg("");
-      onCorrect(item);
+      setAwardedFragment(nextFragment ?? null);
+      onSolved(item);
     } else {
       const next = wrong + 1;
       setWrong(next);
@@ -267,8 +367,17 @@ function ItemModal({
     }
   }
 
+  function acknowledge() {
+    const el = fragmentRef.current;
+    if (!el) {
+      onClose();
+      return;
+    }
+    onAcknowledge(el.getBoundingClientRect());
+  }
+
   return (
-    <Modal open={!!item} onClose={onClose} title={item.label}>
+    <Modal open={!!item} onClose={solved ? () => {} : onClose} title={item.label} hideClose>
       <div className="mb-3 overflow-hidden rounded-lg border border-border bg-muted/30">
         <img
           src={item.image}
@@ -282,12 +391,31 @@ function ItemModal({
         <div className="rounded-lg bg-amber-50 p-3 text-center text-sm text-amber-800">
           这个线索已经收集过啦～
         </div>
-      ) : justSolved ? (
-        <div className="rounded-lg bg-emerald-50 p-3 text-center text-sm text-emerald-700">
-          ✓ 获得碎片：
-          <span className="ml-2 inline-flex h-8 w-8 items-center justify-center rounded border-2 border-emerald-500 bg-white font-serif text-xl">
-            {item.fragment}
-          </span>
+      ) : solved ? (
+        <div className="space-y-4">
+          <div className="rounded-lg bg-emerald-50 p-4 text-center">
+            <p className="mb-3 text-sm font-medium text-emerald-700">
+              回答正确，获得一个碎片
+            </p>
+            <div className="flex justify-center">
+              <div
+                ref={fragmentRef}
+                className="relative flex h-16 w-16 items-center justify-center rounded-lg border-2 border-amber-400 bg-gradient-to-br from-amber-50 to-amber-200 font-serif text-3xl text-amber-900 shadow-[0_0_18px_4px_rgba(252,211,77,0.6)]"
+                style={{
+                  clipPath:
+                    "polygon(0% 0%, 60% 0%, 65% 10%, 75% 10%, 80% 0%, 100% 0%, 100% 60%, 90% 65%, 90% 75%, 100% 80%, 100% 100%, 0% 100%)",
+                }}
+              >
+                {awardedFragment ?? "?"}
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={acknowledge}
+            className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90"
+          >
+            知道了
+          </button>
         </div>
       ) : (
         <>
@@ -321,17 +449,21 @@ function ItemModal({
             ))}
           </div>
           <div className="mt-4 flex items-center justify-between gap-3">
-            {msg ? (
-              <p className="text-xs text-destructive">{msg}</p>
-            ) : (
-              <span />
-            )}
-            <button
-              onClick={submit}
-              className="rounded-md bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground transition hover:opacity-90"
-            >
-              确认
-            </button>
+            {msg ? <p className="text-xs text-destructive">{msg}</p> : <span />}
+            <div className="flex gap-2">
+              <button
+                onClick={onClose}
+                className="rounded-md border border-border bg-background px-3 py-1.5 text-sm transition hover:bg-muted"
+              >
+                关闭
+              </button>
+              <button
+                onClick={submit}
+                className="rounded-md bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground transition hover:opacity-90"
+              >
+                确认
+              </button>
+            </div>
           </div>
         </>
       )}
@@ -350,19 +482,17 @@ function SortModal({
   onSuccess,
 }: {
   open: boolean;
-  fragments: string[]; // 玩家收集到的碎片（按答题顺序）
-  correctOrder: string[]; // 正确顺序
+  fragments: string[];
+  correctOrder: string[];
   wrongMessage: string;
   successText: string;
   onClose: () => void;
   onSuccess: () => void;
 }) {
-  // 池：每个碎片用 index 标识（避免重复字符冲突）
   type Tile = { idx: number; ch: string };
   const pool = useMemo<Tile[]>(() => {
     if (!open) return [];
     const arr = fragments.map((ch, idx) => ({ idx, ch }));
-    // 简单 shuffle
     for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [arr[i], arr[j]] = [arr[j], arr[i]];
@@ -445,7 +575,6 @@ function SortModal({
             按正确顺序点击下方碎片，依次放入上方空槽。点击已放入的槽可以取出。
           </p>
 
-          {/* 空槽 */}
           <div className="flex justify-center gap-2">
             {slots.map((s, i) => (
               <button
@@ -462,7 +591,6 @@ function SortModal({
             ))}
           </div>
 
-          {/* 可选碎片池 */}
           <div className="flex flex-wrap justify-center gap-2 rounded-lg bg-muted/40 p-3">
             {available.length === 0 ? (
               <span className="text-xs text-muted-foreground">全部已放入</span>
