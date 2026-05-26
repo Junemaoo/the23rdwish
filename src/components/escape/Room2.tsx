@@ -15,6 +15,7 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
     ROOM_2_DATA;
 
   const [openExhibit, setOpenExhibit] = useState<Exhibit | null>(null);
+  const [sortOpen, setSortOpen] = useState(false);
   const [solved, setSolved] = useState(false);
   const [errMsg, setErrMsg] = useState("");
   const [wrong, setWrong] = useState(0);
