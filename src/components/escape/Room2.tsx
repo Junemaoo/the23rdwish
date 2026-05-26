@@ -392,7 +392,7 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
 
 
 
-      <Modal open={solved} onClose={onComplete} title="🗂️ 档案归档完成">
+      <Modal open={solved && !archiveAck} onClose={() => setArchiveAck(true)} title="🗂️ 档案归档完成">
         {successText}
       </Modal>
 
