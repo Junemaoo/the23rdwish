@@ -110,21 +110,22 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6">
-      <header className="text-center">
-        <p className="text-xs tracking-[0.3em] text-muted-foreground">
+    <div className="fixed inset-0 z-0 h-screen w-screen overflow-hidden bg-black">
+      <header className="pointer-events-none absolute left-4 top-4 z-30 rounded-lg bg-black/50 px-3 py-2 text-left backdrop-blur">
+        <p className="text-[10px] tracking-[0.3em] text-amber-100/80">
           房间 {meta.index} / {meta.total}
         </p>
-        <h2 className="mt-1 font-serif text-3xl text-foreground sm:text-4xl">
+        <h2 className="font-serif text-lg text-amber-50 sm:text-xl">
           《{meta.name}》
         </h2>
-        <p className="mt-1 text-sm text-muted-foreground">{meta.subtitle}</p>
+        <p className="text-[11px] text-amber-100/70">{meta.subtitle}</p>
       </header>
 
-      {/* 展览馆 — 等距渲染底图 + 透明热区 */}
+      {/* 展览馆 — 等距渲染底图 + 透明热区，铺满视口 */}
       <div
-        className="relative w-full overflow-hidden rounded-3xl border-2 border-[oklch(0.45_0.06_45)] shadow-2xl bg-black"
-        style={{ aspectRatio: "4 / 3" }}
+        className="absolute inset-0"
+
+
         onMouseMove={(e) => {
           if (!debug) return;
           const r = e.currentTarget.getBoundingClientRect();
@@ -242,8 +243,9 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
         )}
       </div>
 
-      {/* 排序区 */}
-      <section className="rounded-2xl border border-border bg-card/80 p-5 backdrop-blur">
+      {/* 排序区 — 浮在底部 */}
+      <section className="absolute bottom-3 left-1/2 z-20 w-[min(960px,96vw)] -translate-x-1/2 rounded-2xl border border-border bg-card/85 p-4 shadow-2xl backdrop-blur">
+
         <p className="mb-1 text-sm font-medium text-card-foreground">{puzzlePrompt}</p>
         <p className="mb-4 text-xs text-muted-foreground">
           支持拖拽；移动端可"点选展品 → 点击卡槽"放置。点击展厅中的展柜可查看详情。
@@ -336,7 +338,8 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
       {solved && (
         <button
           onClick={onComplete}
-          className="mx-auto rounded-full bg-primary px-8 py-3 text-sm font-medium text-primary-foreground shadow-lg transition hover:opacity-90"
+          className="absolute left-1/2 top-6 z-30 -translate-x-1/2 rounded-full bg-primary px-8 py-3 text-sm font-medium text-primary-foreground shadow-lg transition hover:opacity-90"
+
         >
           {nextCta} →
         </button>
