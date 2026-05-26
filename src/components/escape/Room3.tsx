@@ -14,7 +14,7 @@ const HOTSPOTS: Record<string, { x: number; y: number; w: number }> = {
   map: { x: 73, y: 78, w: 14 },
 };
 
-const BOTTLE_POS = { x: 74, y: 27, w: 8 };
+const BOTTLE_POS = { x: 74, y: 22, w: 7 };
 const DOOR_BTN_POS = { x: 40, y: 19 };
 
 export function Room3({ onComplete }: { onComplete: () => void }) {
@@ -24,6 +24,7 @@ export function Room3({ onComplete }: { onComplete: () => void }) {
   const [solvedItems, setSolvedItems] = useState<Set<string>>(new Set());
   const [collected, setCollected] = useState<string[]>([]);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [bottleNudge, setBottleNudge] = useState(false);
 
   const allCollected = collected.length === fragmentOrder.length;
 
@@ -40,81 +41,87 @@ export function Room3({ onComplete }: { onComplete: () => void }) {
 
   return (
     <div
-      className="relative w-full overflow-hidden"
+      className="relative flex w-full items-center justify-center overflow-hidden bg-[#1a1410]"
       style={{ height: "calc(100vh - 49px)" }}
     >
-      {/* 背景图 */}
-      <img
-        src={sceneImg}
-        alt="未来的一日行程单 · 桌面场景"
-        className="absolute inset-0 h-full w-full object-contain"
-      />
-
-      {/* 5 个物件热点（透明） */}
-      {items.map((it) => {
-        const spot = HOTSPOTS[it.id];
-        if (!spot) return null;
-        const done = solvedItems.has(it.id);
-        return (
-          <button
-            key={it.id}
-            onClick={() => setOpenItem(it)}
-            style={{
-              left: `${spot.x}%`,
-              top: `${spot.y}%`,
-              width: `${spot.w}%`,
-              aspectRatio: "1 / 1",
-            }}
-            className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer"
-            title={it.label}
-            aria-label={it.label}
-          >
-            {done && (
-              <span className="absolute left-1/2 top-1/2 flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-emerald-500 text-xs text-white shadow-lg">
-                ✓
-              </span>
-            )}
-          </button>
-        );
-      })}
-
-      {/* 许愿瓶热点（柜子上） */}
-      <button
-        onClick={() => {
-          if (allCollected) setShowSuccess(true);
-        }}
-        style={{
-          left: `${BOTTLE_POS.x}%`,
-          top: `${BOTTLE_POS.y}%`,
-          width: `${BOTTLE_POS.w}%`,
-          aspectRatio: "1 / 2",
-        }}
-        className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer"
-        title={allCollected ? "许愿瓶被点亮了" : `还差 ${fragmentOrder.length - collected.length} 片`}
-        aria-label="许愿瓶"
+      {/* 内层 stage：固定 4:3 比例，所有热点坐标都对齐这里 */}
+      <div
+        className="relative h-full"
+        style={{ aspectRatio: "1449 / 1086" }}
       >
-        {allCollected && (
-          <>
-            <span className="pointer-events-none absolute inset-0 animate-pulse rounded-full bg-amber-300/40 blur-2xl" />
-            <span className="pointer-events-none absolute inset-0 rounded-full shadow-[0_0_40px_12px_rgba(252,211,77,0.75)]" />
-          </>
-        )}
-      </button>
+        {/* 背景图 */}
+        <img
+          src={sceneImg}
+          alt="未来的一日行程单 · 桌面场景"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
 
+        {/* 5 个物件热点（透明） */}
+        {items.map((it) => {
+          const spot = HOTSPOTS[it.id];
+          if (!spot) return null;
+          const done = solvedItems.has(it.id);
+          return (
+            <button
+              key={it.id}
+              onClick={() => setOpenItem(it)}
+              style={{
+                left: `${spot.x}%`,
+                top: `${spot.y}%`,
+                width: `${spot.w}%`,
+                aspectRatio: "1 / 1",
+              }}
+              className="absolute z-10 -translate-x-1/2 -translate-y-1/2 cursor-pointer"
+              title={it.label}
+              aria-label={it.label}
+            >
+              {done && (
+                <span className="absolute left-1/2 top-1/2 flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-emerald-500 text-xs text-white shadow-lg">
+                  ✓
+                </span>
+              )}
+            </button>
+          );
+        })}
 
-      {/* 集齐后：门上发光按钮"进入下一关" */}
-      {allCollected && (
+        {/* 许愿瓶热点（柜子上） */}
         <button
-          onClick={onComplete}
-          style={{
-            left: `${DOOR_BTN_POS.x}%`,
-            top: `${DOOR_BTN_POS.y}%`,
+          onClick={() => {
+            if (allCollected) setShowSuccess(true);
+            else setBottleNudge(true);
           }}
-          className="absolute z-20 -translate-x-1/2 -translate-y-1/2 animate-fade-in rounded-full bg-amber-300/90 px-5 py-2 text-xs font-semibold text-amber-950 shadow-[0_0_24px_6px_rgba(252,211,77,0.75)] ring-1 ring-amber-200 transition hover:scale-105"
+          style={{
+            left: `${BOTTLE_POS.x}%`,
+            top: `${BOTTLE_POS.y}%`,
+            width: `${BOTTLE_POS.w}%`,
+            aspectRatio: "1 / 1.6",
+          }}
+          className="absolute z-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer"
+          title={allCollected ? "许愿瓶被点亮了" : `还差 ${fragmentOrder.length - collected.length} 片`}
+          aria-label="许愿瓶"
         >
-          进入下一关 →
+          {allCollected && (
+            <>
+              <span className="pointer-events-none absolute inset-0 animate-pulse rounded-full bg-amber-300/40 blur-2xl" />
+              <span className="pointer-events-none absolute inset-0 rounded-full shadow-[0_0_40px_12px_rgba(252,211,77,0.75)]" />
+            </>
+          )}
         </button>
-      )}
+
+        {/* 集齐后：门上发光按钮"进入下一关" */}
+        {allCollected && (
+          <button
+            onClick={onComplete}
+            style={{
+              left: `${DOOR_BTN_POS.x}%`,
+              top: `${DOOR_BTN_POS.y}%`,
+            }}
+            className="absolute z-20 -translate-x-1/2 -translate-y-1/2 animate-fade-in rounded-full bg-amber-300/90 px-5 py-2 text-xs font-semibold text-amber-950 shadow-[0_0_24px_6px_rgba(252,211,77,0.75)] ring-1 ring-amber-200 transition hover:scale-105"
+          >
+            进入下一关 →
+          </button>
+        )}
+      </div>
 
       {/* 答题弹窗 */}
       <ItemModal
@@ -127,6 +134,11 @@ export function Room3({ onComplete }: { onComplete: () => void }) {
       {/* 集齐成功提示 */}
       <Modal open={showSuccess} onClose={() => setShowSuccess(false)} title="✨ 许愿瓶亮了">
         {meta.successText}
+      </Modal>
+
+      {/* 未集齐时点瓶子的提示 */}
+      <Modal open={bottleNudge} onClose={() => setBottleNudge(false)} title="许愿瓶还暗着">
+        {`还差 ${fragmentOrder.length - collected.length} 片碎片，先去桌上找找～`}
       </Modal>
     </div>
   );
