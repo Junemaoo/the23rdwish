@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { FINALE } from "./config";
-import letterBg from "@/assets/finale/letter-bg.png";
+import letterImg from "@/assets/finale/letter.png";
 import cakeImg from "@/assets/finale/cake.png";
 
 type Stage = "initial" | "gift1" | "gift2Box" | "cake";
@@ -54,28 +53,19 @@ function GiftBox({ opened, onClick }: { opened: boolean; onClick: () => void }) 
       className={`relative h-56 w-56 transition-transform ${
         opened ? "" : "animate-[wiggle_2s_ease-in-out_infinite] hover:scale-105"
       }`}
-      style={{
-        // @ts-expect-error custom keyframes via inline style
-        "--tw-wiggle": "1",
-      }}
     >
-      {/* 盒身 */}
       <div className="absolute inset-x-4 bottom-2 top-16 rounded-xl bg-gradient-to-b from-[#F8B4C8] to-[#E48AA8] shadow-lg" />
-      {/* 竖丝带 */}
       <div className="absolute bottom-2 top-16 left-1/2 w-6 -translate-x-1/2 bg-[#FFE36A]" />
-      {/* 盒盖 */}
       <div
         className={`absolute inset-x-1 top-12 h-12 rounded-lg bg-gradient-to-b from-[#FF9CBA] to-[#E37BA0] shadow-md transition-all duration-500 ${
           opened ? "-translate-y-10 -rotate-12 opacity-0" : ""
         }`}
       />
-      {/* 横丝带 */}
       <div
         className={`absolute left-1 right-1 top-[3.75rem] h-3 bg-[#FFE36A] transition-all duration-500 ${
           opened ? "-translate-y-10 opacity-0" : ""
         }`}
       />
-      {/* 蝴蝶结 */}
       <div
         className={`absolute left-1/2 top-6 -translate-x-1/2 transition-all duration-500 ${
           opened ? "-translate-y-14 scale-150 opacity-0" : ""
@@ -100,6 +90,12 @@ function GiftBox({ opened, onClick }: { opened: boolean; onClick: () => void }) 
 export function Finale({ onRestart }: { onRestart: () => void }) {
   const [stage, setStage] = useState<Stage>("initial");
   const [boxOpened, setBoxOpened] = useState(false);
+  const [letterFading, setLetterFading] = useState(false);
+
+  const handleUnlockGift2 = () => {
+    setLetterFading(true);
+    setTimeout(() => setStage("gift2Box"), 600);
+  };
 
   return (
     <div
@@ -110,7 +106,6 @@ export function Finale({ onRestart }: { onRestart: () => void }) {
       }}
     >
       <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-8 text-center">
-        {/* 标题 */}
         <header className="flex flex-col items-center gap-3">
           <h1 className="font-serif text-4xl font-bold text-[#C25B7C] drop-shadow-sm md:text-5xl">
             🎉 恭喜你！成功通关！
@@ -120,7 +115,6 @@ export function Finale({ onRestart }: { onRestart: () => void }) {
           </p>
         </header>
 
-        {/* Stage: initial — 解锁礼物1 */}
         {stage === "initial" && (
           <div className="animate-in fade-in zoom-in-95 duration-500">
             <YellowButton onClick={() => setStage("gift1")}>
@@ -129,46 +123,32 @@ export function Finale({ onRestart }: { onRestart: () => void }) {
           </div>
         )}
 
-        {/* Stage: gift1 — 信纸 */}
-        {(stage === "gift1" || stage === "gift2Box" || stage === "cake") && (
-          <section className="relative w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
+        {stage === "gift1" && (
+          <section
+            className={`relative w-full transition-opacity duration-500 ${
+              letterFading
+                ? "opacity-0"
+                : "opacity-100 animate-in fade-in slide-in-from-bottom-4 duration-700"
+            }`}
+          >
             <div className="relative mx-auto max-w-md">
-              <Sparkles />
-              <div
-                className="relative mx-auto rounded-[18px] px-8 py-10 text-left shadow-[0_20px_50px_-20px_rgba(180,130,90,0.55)]"
-                style={{
-                  backgroundImage: `url(${letterBg})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                  backgroundColor: "#F5EAD2",
-                  minHeight: "520px",
-                }}
-              >
-                <div className="absolute inset-0 rounded-[18px] bg-[#F8EFD8]/55" />
-                <div className="relative">
-                  <h2 className="mb-4 font-serif text-2xl font-bold text-[#3E2F2A]">
-                    {FINALE.letterTitle}
-                  </h2>
-                  <div className="whitespace-pre-line font-serif text-[15px] leading-[1.95] text-[#3E2F2A]/90">
-                    {FINALE.letter.join("\n")}
-                  </div>
-                </div>
-              </div>
+              <img
+                src={letterImg}
+                alt="生日信"
+                className="mx-auto w-full rounded-[18px] shadow-[0_24px_60px_-20px_rgba(120,80,50,0.55)]"
+              />
             </div>
 
-            {stage === "gift1" && (
-              <div className="mt-8 animate-in fade-in duration-500">
-                <YellowButton onClick={() => setStage("gift2Box")}>
-                  🎀 解锁礼物2
-                </YellowButton>
-              </div>
-            )}
+            <div className="mt-8 animate-in fade-in duration-500">
+              <YellowButton onClick={handleUnlockGift2}>
+                🎀 解锁礼物2
+              </YellowButton>
+            </div>
           </section>
         )}
 
-        {/* Stage: gift2Box — 礼物盒 */}
         {stage === "gift2Box" && (
-          <section className="relative flex flex-col items-center gap-4 animate-in fade-in zoom-in-95 duration-500">
+          <section className="relative flex min-h-[400px] flex-col items-center justify-center gap-4 animate-in fade-in zoom-in-95 duration-500">
             <GiftBox
               opened={boxOpened}
               onClick={() => {
@@ -181,7 +161,6 @@ export function Finale({ onRestart }: { onRestart: () => void }) {
           </section>
         )}
 
-        {/* Stage: cake — 生日蛋糕 */}
         {stage === "cake" && (
           <section className="relative flex flex-col items-center gap-4 animate-in fade-in slide-in-from-bottom-6 duration-700">
             <div className="relative">
