@@ -449,12 +449,9 @@ function Slot({
         title={exhibit ? "点击移回" : "拖拽或点击放入"}
       >
         {exhibit ? (
-          <>
-            <span className="text-2xl">{exhibit.icon}</span>
-            <span className="text-[10px] text-card-foreground">
-              {exhibit.name}
-            </span>
-          </>
+          <span className="text-2xl font-semibold text-card-foreground">
+            {exhibit.no}
+          </span>
         ) : (
           <span className="text-xs text-muted-foreground">空</span>
         )}
