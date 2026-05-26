@@ -285,8 +285,10 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
         )}
       </div>
 
-      {/* 排序区 — 浮在底部 */}
-      <section className="absolute bottom-3 left-1/2 z-20 w-[min(960px,96vw)] -translate-x-1/2 rounded-2xl border border-border bg-card/85 p-4 shadow-2xl backdrop-blur">
+      {/* 排序面板 — 由布告板触发的弹窗 */}
+      <Modal open={sortOpen} onClose={() => setSortOpen(false)} title="🗂️ 展品时间排序">
+        <div>
+
 
         <p className="mb-1 text-sm font-medium text-card-foreground">{puzzlePrompt}</p>
         <p className="mb-4 text-xs text-muted-foreground">
