@@ -12,7 +12,7 @@ import room2Bg from "@/assets/room2-hall.png";
  * - 按 D 切换调试网格 / 鼠标坐标 / 热区描边
  */
 export function Room2({ onComplete }: { onComplete: () => void }) {
-  const { meta, exhibits, sortablePool, correctOrder, slotLabels, puzzlePrompt, errorMessages, successText, nextCta } =
+  const { meta, exhibits, sortablePool, correctOrder, slotLabels, puzzlePrompt, errorMessages } =
     ROOM_2_DATA;
 
   const [openExhibit, setOpenExhibit] = useState<Exhibit | null>(null);
@@ -391,19 +391,6 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
 
 
 
-      <Modal open={solved} onClose={onComplete} title="🗂️ 档案归档完成">
-        {successText}
-      </Modal>
-
-      {solved && (
-        <button
-          onClick={onComplete}
-          className="absolute left-1/2 top-6 z-30 -translate-x-1/2 rounded-full bg-primary px-8 py-3 text-sm font-medium text-primary-foreground shadow-lg transition hover:opacity-90"
-
-        >
-          {nextCta} →
-        </button>
-      )}
     </div>
   );
 }
