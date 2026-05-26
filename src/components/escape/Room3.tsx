@@ -7,14 +7,14 @@ const norm = (s: string) => s.replace(/\s+/g, "").toLowerCase();
 
 /** 热点坐标（基于 scene.png 实际位置，可微调） */
 const HOTSPOTS: Record<string, { x: number; y: number; w: number }> = {
-  noodles: { x: 32, y: 62, w: 14 },
+  noodles: { x: 38, y: 62, w: 14 },
   popmart: { x: 25, y: 78, w: 11 },
   ticket: { x: 45, y: 75, w: 14 },
   coffee: { x: 56, y: 67, w: 11 },
   map: { x: 73, y: 78, w: 14 },
 };
 
-const BOTTLE_POS = { x: 74, y: 27, w: 6 };
+const BOTTLE_POS = { x: 74, y: 27, w: 8 };
 const DOOR_BTN_POS = { x: 40, y: 19 };
 
 export function Room3({ onComplete }: { onComplete: () => void }) {
