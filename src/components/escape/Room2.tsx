@@ -19,7 +19,7 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
   const [solved, setSolved] = useState(false);
   const [errMsg, setErrMsg] = useState("");
   const [wrong, setWrong] = useState(0);
-  const [doorHint, setDoorHint] = useState(false);
+  
 
   const [slots, setSlots] = useState<(string | null)[]>([null, null, null, null, null]);
   const inSlots = useMemo(() => new Set(slots.filter(Boolean) as string[]), [slots]);
