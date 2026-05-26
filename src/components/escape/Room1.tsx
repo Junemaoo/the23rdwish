@@ -31,7 +31,6 @@ export function Room1({ onComplete }: { onComplete: () => void }) {
   const [openClue, setOpenClue] = useState<ClueSpot | null>(null);
   const [showAnswer, setShowAnswer] = useState(false);
   const [solved, setSolved] = useState(false);
-  const [doorOpened, setDoorOpened] = useState(false);
   const [collected, setCollected] = useState<Set<string>>(new Set());
   const [showInventory, setShowInventory] = useState(false);
   const [flying, setFlying] = useState<FlyingClue | null>(null);
