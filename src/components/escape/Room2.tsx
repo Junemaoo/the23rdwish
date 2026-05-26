@@ -159,6 +159,46 @@ export function Room2({ onComplete }: { onComplete: () => void }) {
           }}
         />
 
+        {/* 布告板 — 点击弹出排序面板 */}
+        <button
+          onClick={() => setSortOpen(true)}
+          aria-label="展品排序布告板"
+          title="展品排序"
+          className="group absolute focus:outline-none"
+          style={{
+            left: "60%",
+            top: "20%",
+            width: "8%",
+            height: "14%",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          <svg viewBox="0 0 100 110" className="h-full w-full drop-shadow-[0_4px_6px_rgba(0,0,0,0.4)] transition group-hover:scale-105">
+            {/* 绳子 */}
+            <line x1="50" y1="8" x2="20" y2="40" stroke="#3b2a20" strokeWidth="1.2" />
+            <line x1="50" y1="8" x2="80" y2="40" stroke="#3b2a20" strokeWidth="1.2" />
+            {/* 红色钉 */}
+            <circle cx="50" cy="8" r="6" fill="#b8453a" stroke="#7a2a22" strokeWidth="0.8" />
+            {/* 木板 */}
+            <rect x="18" y="38" width="64" height="58" rx="2" fill="#6e4a32" stroke="#3b2a20" strokeWidth="0.8" />
+            {/* 4 条纸 */}
+            {[0, 1, 2, 3].map((i) => (
+              <rect
+                key={i}
+                x={24 + i * 14}
+                y={52}
+                width={10}
+                height={32}
+                fill="#fbf3e6"
+                className="transition group-hover:fill-[#fffbe8]"
+              />
+            ))}
+          </svg>
+          <span className="pointer-events-none absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black/70 px-1.5 py-0.5 text-[10px] text-amber-100 opacity-0 transition group-hover:opacity-100">
+            展品排序
+          </span>
+        </button>
+
         {/* 10 个展柜热区 */}
         {exhibits.map((ex, i) => {
           const p = hotspots[i];
