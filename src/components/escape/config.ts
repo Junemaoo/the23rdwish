@@ -17,8 +17,7 @@ export const OPENING = {
 export const CHAPTERS = [
   {
     title: "我们，在世界的两端",
-    intro:
-      "一个在伦敦的清晨 5 点 20 分，一个在北京的午后 2 点 20 分。\n中间隔着 7 小时，和一句没说出口的「想你」。",
+    intro: "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
     cta: "推开门 →",
   },
   {
