@@ -46,10 +46,10 @@ export function Chapter({
         className={`relative z-10 font-serif text-[120px] leading-none tracking-wider ${t.accent} opacity-30 sm:text-[180px]`}
       >
         Ch.{index + 1}
-        {index === 0 && <span className="block h-8" />}
+        {(index === 0 || index === 1) && <span className="block h-8" />}
       </p>
       <div className={`relative z-10 -mt-16 text-xs tracking-[0.4em] ${t.accent}`}>
-        {index === 0 && <span className="block h-8" />}
+        {(index === 0 || index === 1) && <span className="block h-8" />}
         CHAPTER {index + 1}
       </div>
       <h2
@@ -68,7 +68,7 @@ export function Chapter({
       </p>
       <button
         onClick={onEnter}
-        className={`relative z-10 ${index === 0 ? 'mt-36' : 'mt-10'} rounded-full px-10 py-3.5 text-sm font-medium shadow-[0_0_30px_rgba(245,196,94,.4)] transition hover:scale-105 ${
+        className={`relative z-10 ${(index === 0 || index === 1) ? 'mt-36' : 'mt-10'} rounded-full px-10 py-3.5 text-sm font-medium shadow-[0_0_30px_rgba(245,196,94,.4)] transition hover:scale-105 ${
           dark
             ? "bg-[oklch(0.80_0.135_80)] text-[#3E2F2A] hover:bg-[oklch(0.85_0.135_80)]"
             : "bg-[#3E2F2A] text-[oklch(0.92_0.075_85)] hover:opacity-90"
