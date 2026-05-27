@@ -72,14 +72,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "the23rdwish" },
+      { name: "description", content: "A personalized, warm, and interactive Chinese web-based birthday escape room experience." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "the23rdwish" },
+      { property: "og:description", content: "A personalized, warm, and interactive Chinese web-based birthday escape room experience." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "the23rdwish" },
+      { name: "twitter:description", content: "A personalized, warm, and interactive Chinese web-based birthday escape room experience." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/8a3ac3ed-ee05-4713-9eef-d7b323781b59/id-preview-6d3875e5--3537ba1e-397d-4930-8ddf-a8db52f45f59.lovable.app-1779846501972.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/8a3ac3ed-ee05-4713-9eef-d7b323781b59/id-preview-6d3875e5--3537ba1e-397d-4930-8ddf-a8db52f45f59.lovable.app-1779846501972.png" },
     ],
     links: [
       {
