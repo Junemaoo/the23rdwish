@@ -22,8 +22,7 @@ export const CHAPTERS = [
   },
   {
     title: "礼物档案室",
-    intro:
-      "这间私人小展览，收着我偷偷送过、藏着没送的那些小东西。\n每一件都标了日期。",
+    intro: "\n\n\n\n\n\n\n",
     cta: "走进展览 →",
   },
   {
