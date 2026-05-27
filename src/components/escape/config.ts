@@ -26,9 +26,8 @@ export const CHAPTERS = [
     cta: "走进展览 →",
   },
   {
-    title: "未来的一日行程单",
-    intro:
-      "一张白色的桌子，摆着我们下次见面的全部计划：\n机票、面、咖啡、和一只暗着的许愿瓶。",
+    title: "未来某日行程单",
+    intro: "\n\n\n\n\n\n\n",
     cta: "打开行程单 →",
   },
 ] as const;
@@ -133,7 +132,7 @@ export const ROOMS: RoomConfig[] = [
   {
     id: "room3",
     index: 3,
-    name: "未来的一日行程单",
+    name: "未来某日行程单",
     subtitle: "把约定拆成五片，装进同一只许愿瓶",
     ambient: "",
     hotspots: [],
@@ -258,7 +257,7 @@ export const ROOM_3_DATA = {
   meta: {
     index: 3,
     total: 3,
-    name: "未来的一日行程单",
+    name: "未来某日行程单",
     subtitle: "桌面上散落着我们下次见面的零件",
     ambient:
       "白色桌面上摊着一些东西：机票、小票、两碗面、两杯咖啡、一张北京地图。门旁柜子上有一只暗着的许愿瓶。",
