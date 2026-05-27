@@ -337,7 +337,17 @@ function ItemModal({
   const [msg, setMsg] = useState("");
   const [solved, setSolved] = useState(false);
   const [awardedFragment, setAwardedFragment] = useState<string | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const fragmentRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!previewImage) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setPreviewImage(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [previewImage]);
 
   const key = item?.id ?? "none";
   useEffect(() => {
@@ -378,14 +388,52 @@ function ItemModal({
 
   return (
     <Modal open={!!item} onClose={solved ? () => {} : onClose} title={item.label} hideClose>
-      <div className="mb-3 overflow-hidden rounded-lg border border-border bg-muted/30">
+      <div
+        className="group relative mb-3 cursor-zoom-in overflow-hidden rounded-lg border border-border bg-muted/30"
+        onClick={() => setPreviewImage(item.image)}
+        title="点击图片放大查看"
+      >
         <img
           src={item.image}
           alt={item.label}
           className="mx-auto block max-h-56 w-full object-contain"
           draggable={false}
         />
+        <span className="pointer-events-none absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/55 text-xs text-white shadow">
+          🔍
+        </span>
+        <span className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-black/55 px-2 py-0.5 text-[10px] text-white opacity-0 transition group-hover:opacity-100">
+          点击图片放大查看
+        </span>
       </div>
+
+      {previewImage &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[300] flex items-center justify-center bg-black/80 p-4 animate-fade-in"
+            onClick={() => setPreviewImage(null)}
+          >
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setPreviewImage(null);
+              }}
+              className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-lg text-black shadow-lg transition hover:bg-white"
+              aria-label="关闭预览"
+            >
+              ✕
+            </button>
+            <img
+              src={previewImage}
+              alt={item.label}
+              onClick={(e) => e.stopPropagation()}
+              className="max-h-[90vh] max-w-[92vw] object-contain"
+              draggable={false}
+            />
+          </div>,
+          document.body,
+        )}
 
       {solved ? null : alreadyDone ? (
         <div className="rounded-lg bg-amber-50 p-3 text-center text-sm text-amber-800">
